@@ -1,0 +1,22 @@
+.wrap {
+  width: 100%;
+  min-height: 200px;
+}
+
+.canvasWrap {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  background: #fff;
+}
+
+.error {
+  color: #fca5a5;
+  font-size: 0.85rem;
+}

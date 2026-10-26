@@ -1,0 +1,74 @@
+.panel h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.empty {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.item {
+  padding: 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-elevated);
+}
+
+.row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.code {
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.sev_error {
+  color: #fca5a5;
+  font-size: 0.75rem;
+}
+
+.sev_warn {
+  color: #fde047;
+  font-size: 0.75rem;
+}
+
+.sev_info {
+  color: #93c5fd;
+  font-size: 0.75rem;
+}
+
+.mockTag {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  background: #4b5563;
+  color: #e5e7eb;
+}
+
+.message {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+}
+
+.evidence {
+  margin: 0.5rem 0 0;
+  font-size: 0.7rem;
+  overflow-x: auto;
+  max-height: 6rem;
+  color: var(--text-muted);
+}
