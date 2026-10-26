@@ -13,6 +13,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
       - name: Install package
         run: pip install -e ".[dev]"
       - name: Ruff lint
@@ -27,6 +28,150 @@ jobs:
         run: pytest -q
       - name: Synthetic generator smoke
         run: python -m datasets.synth --n 50 --seed 7 --out datasets/generated
+
+  evals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install package
+        run: pip install -e ".[dev,eval,synth]"
+      - name: Prepare eval dataset directory
+        id: eval_dir
+        run: |
+          mkdir -p "${{ runner.temp }}/aravali-ci-eval"
+          echo "path=${{ runner.temp }}/aravali-ci-eval" >> "$GITHUB_OUTPUT"
+      - name: Generate eval dataset
+        run: python -m datasets.synth --n 50 --seed 7 --scanned-ratio 0 --out "${{ steps.eval_dir.outputs.path }}"
+      - name: Truth-as-prediction gate (blocking)
+        run: |
+          python -m evals.run --pred truth --truth "${{ steps.eval_dir.outputs.path }}" --report evals/out/report-smoke.json
+          python -m evals.gate --report evals/out/report-smoke.json
+      - name: Extraction eval (report-only until M3)
+        id: extract_eval
+        continue-on-error: true
+        env:
+          TRUTH_DIR: ${{ steps.eval_dir.outputs.path }}
+        run: |
+          python - <<'PY'
+          import importlib.util
+          import json
+          import os
+          import sys
+          from pathlib import Path
+
+          has_extract = importlib.util.find_spec("docai.extract") is not None
+          try:
+              from docai.extract import extract_file
+              has_extract = callable(extract_file)
+          except Exception:
+              has_extract = False
+
+          truth_dir = Path(os.environ["TRUTH_DIR"])
+          pred_dir = Path("evals/out/pred")
+          pred_dir.mkdir(parents=True, exist_ok=True)
+
+          if not has_extract:
+              print("NOTICE: docai.extract.extract_file not available; skipping real extraction eval.")
+              sys.exit(0)
+
+          for truth_path in truth_dir.glob("*.truth.json"):
+              iid = truth_path.stem.removesuffix(".truth")
+              pdf = truth_dir / f"{iid}.pdf"
+              inv = extract_file(pdf)
+              (pred_dir / f"{iid}.json").write_text(
+                  json.dumps(inv.model_dump(mode="json"), indent=2) + "\n",
+                  encoding="utf-8",
+              )
+
+          import subprocess
+          subprocess.check_call(
+              [
+                  sys.executable,
+                  "-m",
+                  "evals.run",
+                  "--pred",
+                  str(pred_dir),
+                  "--truth",
+                  str(truth_dir),
+                  "--report",
+                  "evals/out/report.json",
+              ]
+          )
+          subprocess.check_call(
+              [sys.executable, "-m", "evals.gate", "--report", "evals/out/report.json"]
+          )
+          PY
+      - name: Write step summary
+        if: always()
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          import os
+
+          summary = os.environ.get("GITHUB_STEP_SUMMARY")
+          if not summary:
+              raise SystemExit(0)
+          path = Path("evals/out/report-smoke.json")
+          if not path.is_file():
+              raise SystemExit(0)
+          report = json.loads(path.read_text())
+          s = report.get("summary", {})
+          lines = [
+              "## Eval summary (truth-as-prediction smoke)",
+              f"- invoices: {s.get('count', 0)}",
+              f"- header macro F1: {s.get('header_macro_f1')}",
+              f"- line items F1: {(s.get('line_items') or {}).get('f1')}",
+              f"- bbox IoU@0.5: {(s.get('bboxes') or {}).get('iou_at_0_5_rate')}",
+          ]
+          real = Path("evals/out/report.json")
+          if real.is_file():
+              r = json.loads(real.read_text()).get("summary", {})
+              lines += [
+                  "",
+                  "## Eval summary (offline extraction)",
+                  f"- header macro F1: {r.get('header_macro_f1')}",
+                  f"- bbox IoU@0.5: {(r.get('bboxes') or {}).get('iou_at_0_5_rate')}",
+              ]
+          Path(summary).write_text("\n".join(lines) + "\n", encoding="utf-8")
+          PY
+      - name: Upload eval report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: evals/out/*.json
+
+  ui:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ui
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect package lockfile
+        id: lock
+        run: test -f package-lock.json && echo present=true >> "$GITHUB_OUTPUT" || echo present=false >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v4
+        if: steps.lock.outputs.present == 'true'
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+      - if: steps.lock.outputs.present == 'true'
+        run: npm ci
+      - if: steps.lock.outputs.present == 'true'
+        run: npm run lint
+      - if: steps.lock.outputs.present == 'true'
+        run: npm run typecheck
+      - if: steps.lock.outputs.present == 'true'
+        run: npm test -- --run
+      - if: steps.lock.outputs.present == 'true'
+        run: npm run build
 
   frozen-files:
     if: github.event_name == 'pull_request'
