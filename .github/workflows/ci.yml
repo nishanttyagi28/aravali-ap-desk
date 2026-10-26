@@ -39,19 +39,27 @@ jobs:
           cache: pip
       - name: Install package
         run: pip install -e ".[dev,eval,synth]"
+      - name: Prepare eval dataset directory
+        id: eval_dir
+        run: |
+          mkdir -p "${{ runner.temp }}/aravali-ci-eval"
+          echo "path=${{ runner.temp }}/aravali-ci-eval" >> "$GITHUB_OUTPUT"
       - name: Generate eval dataset
-        run: python -m datasets.synth --n 50 --seed 7 --scanned-ratio 0 --out datasets/ci_eval
+        run: python -m datasets.synth --n 50 --seed 7 --scanned-ratio 0 --out "${{ steps.eval_dir.outputs.path }}"
       - name: Truth-as-prediction gate (blocking)
         run: |
-          python -m evals.run --pred truth --truth datasets/ci_eval --report evals/out/report-smoke.json
+          python -m evals.run --pred truth --truth "${{ steps.eval_dir.outputs.path }}" --report evals/out/report-smoke.json
           python -m evals.gate --report evals/out/report-smoke.json
       - name: Extraction eval (report-only until M3)
         id: extract_eval
         continue-on-error: true
+        env:
+          TRUTH_DIR: ${{ steps.eval_dir.outputs.path }}
         run: |
           python - <<'PY'
           import importlib.util
           import json
+          import os
           import sys
           from pathlib import Path
 
@@ -62,7 +70,7 @@ jobs:
           except Exception:
               has_extract = False
 
-          truth_dir = Path("datasets/ci_eval")
+          truth_dir = Path(os.environ["TRUTH_DIR"])
           pred_dir = Path("evals/out/pred")
           pred_dir.mkdir(parents=True, exist_ok=True)
 
@@ -139,23 +147,31 @@ jobs:
           path: evals/out/*.json
 
   ui:
-    if: hashFiles('ui/package-lock.json') != ''
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ui
     steps:
       - uses: actions/checkout@v4
+      - name: Detect package lockfile
+        id: lock
+        run: test -f package-lock.json && echo present=true >> "$GITHUB_OUTPUT" || echo present=false >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v4
+        if: steps.lock.outputs.present == 'true'
         with:
           node-version: "22"
           cache: npm
           cache-dependency-path: ui/package-lock.json
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm test -- --run
-      - run: npm run build
+      - if: steps.lock.outputs.present == 'true'
+        run: npm ci
+      - if: steps.lock.outputs.present == 'true'
+        run: npm run lint
+      - if: steps.lock.outputs.present == 'true'
+        run: npm run typecheck
+      - if: steps.lock.outputs.present == 'true'
+        run: npm test -- --run
+      - if: steps.lock.outputs.present == 'true'
+        run: npm run build
 
   frozen-files:
     if: github.event_name == 'pull_request'

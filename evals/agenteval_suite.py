@@ -17,9 +17,6 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from agenteval.core.schema import CaseResult, RunReport
-from agenteval.core.store import get_git_sha
-
 from evals.metrics import compute_report
 
 
@@ -28,7 +25,10 @@ def build_run_report(
     truth_dir: Path,
     *,
     adapter: str = "aravali_extract",
-) -> RunReport:
+) -> Any:
+    from agenteval.core.schema import CaseResult, RunReport
+    from agenteval.core.store import get_git_sha
+
     report = compute_report(pred_dir, truth_dir)
     summary = report.get("summary") or {}
     macro_f1 = summary.get("header_macro_f1")

@@ -3,6 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
 from pypdf import PdfReader
 
 from datasets.synth.generator import (
@@ -143,6 +144,8 @@ def test_v1_broken_cases_validate_where_supported(tmp_path: Path) -> None:
 
 
 def test_scanned_pdf_is_image_only(tmp_path: Path) -> None:
+    pytest.importorskip("pypdfium2")
+    pytest.importorskip("PIL")
     out = tmp_path / "scanned"
     generate_dataset(
         3,

@@ -7,8 +7,6 @@ import random
 from io import BytesIO
 from pathlib import Path
 
-import pypdfium2 as pdfium
-from PIL import Image, ImageFilter
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
@@ -65,6 +63,9 @@ def rasterize_to_scanned_pdf(
     dpi: int | None = None,
 ) -> tuple[float, int]:
     """Replace ``vector_pdf`` with an image-only PDF; return (angle_deg, dpi)."""
+    import pypdfium2 as pdfium
+    from PIL import Image, ImageFilter
+
     if dpi is None:
         dpi = rng.randint(150, 200)
     angle_deg = rng.uniform(-1.5, 1.5)

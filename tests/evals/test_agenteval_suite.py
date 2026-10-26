@@ -1,5 +1,9 @@
 from pathlib import Path
 
+import pytest
+
+pytest.importorskip("agenteval")
+
 from datasets.synth.generator import generate_dataset
 from evals.agenteval_suite import build_run_report
 
