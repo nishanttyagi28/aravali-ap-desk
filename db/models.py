@@ -86,6 +86,18 @@ class ReviewActionRow(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class LedgerReceiptRow(Base):
+    __tablename__ = "ledger_receipts"
+
+    seq: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    entry_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("ledger_entries.entry_id"), unique=True, index=True
+    )
+    receipt_sha256: Mapped[str] = mapped_column(String(64))
+    prev_receipt_sha256: Mapped[str] = mapped_column(String(64))
+    body: Mapped[dict[str, Any]] = mapped_column(JSON)
+
+
 class LedgerEntryRow(Base):
     __tablename__ = "ledger_entries"
 

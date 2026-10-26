@@ -39,7 +39,8 @@
       "enum": [
         "pending",
         "witnessed",
-        "failed"
+        "failed",
+        "local"
       ],
       "title": "WitnessStatus",
       "type": "string"

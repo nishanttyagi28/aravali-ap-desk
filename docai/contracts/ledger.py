@@ -19,6 +19,7 @@ class WitnessStatus(StrEnum):
     PENDING = "pending"
     WITNESSED = "witnessed"
     FAILED = "failed"
+    LOCAL = "local"
 
 
 class SealRef(BaseModel):

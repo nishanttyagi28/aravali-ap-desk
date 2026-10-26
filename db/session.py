@@ -78,6 +78,28 @@ def _install_append_only_triggers(connection) -> None:  # noqa: ANN001
             """
         )
     )
+    connection.execute(
+        text(
+            """
+            CREATE TRIGGER IF NOT EXISTS ledger_receipts_no_update
+            BEFORE UPDATE ON ledger_receipts
+            BEGIN
+                SELECT RAISE(ABORT, 'ledger_receipts is append-only');
+            END;
+            """
+        )
+    )
+    connection.execute(
+        text(
+            """
+            CREATE TRIGGER IF NOT EXISTS ledger_receipts_no_delete
+            BEFORE DELETE ON ledger_receipts
+            BEGIN
+                SELECT RAISE(ABORT, 'ledger_receipts is append-only');
+            END;
+            """
+        )
+    )
 
 
 def init_db(engine: Engine) -> None:

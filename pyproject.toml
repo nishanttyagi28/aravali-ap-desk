@@ -37,7 +37,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["docai", "api", "ledger", "db", "datasets", "evals"]
+packages = ["docai", "api", "ledger", "db", "datasets", "evals", "bi"]
 
 [tool.ruff]
 line-length = 100

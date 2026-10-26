@@ -1,6 +1,14 @@
 """Append-only ledger posting."""
 
-from ledger.posting import AlreadyPosted, InvoiceNotFound, NotPostable, post_invoice, verify_chain
+from ledger.posting import (
+    AlreadyPosted,
+    InvoiceNotFound,
+    NotPostable,
+    post_invoice,
+    verify_chain,
+    verify_receipt_chain,
+)
+from ledger.receipt import GENESIS_PREV_RECEIPT_SHA256
 from ledger.seal import (
     KarmaSakshiNotAvailable,
     SealProvider,
@@ -10,6 +18,7 @@ from ledger.seal import (
 
 __all__ = [
     "AlreadyPosted",
+    "GENESIS_PREV_RECEIPT_SHA256",
     "InvoiceNotFound",
     "KarmaSakshiNotAvailable",
     "NotPostable",
@@ -18,4 +27,5 @@ __all__ = [
     "karma_sakshi_provider",
     "post_invoice",
     "verify_chain",
+    "verify_receipt_chain",
 ]

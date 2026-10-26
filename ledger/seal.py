@@ -11,10 +11,10 @@ from docai.contracts.ledger import SealRef, WitnessStatus
 
 
 class SealProvider(Protocol):
-    def seal(self, manifest: dict[str, Any]) -> SealRef: ...
+    def seal_receipt(self, receipt_sha256: str) -> SealRef: ...
 
     def witness(self, entry_hash: str, manifest_sha256: str, chain_prev: str | None) -> str:
-        """Return ``match`` or ``mismatch``."""
+        """Return ``match`` or ``mismatch`` (legacy chain on entry_hash)."""
         ...
 
 
@@ -28,13 +28,12 @@ def manifest_sha256(manifest: dict[str, Any]) -> str:
 
 
 class StubSealProvider:
-    def seal(self, manifest: dict[str, Any]) -> SealRef:
-        digest = manifest_sha256(manifest)
+    def seal_receipt(self, receipt_sha256: str) -> SealRef:
         return SealRef(
             provider=SealProviderKind.STUB,
-            commit_id=digest[:16],
-            manifest_sha256=digest,
-            witness_status=WitnessStatus.PENDING,
+            commit_id=receipt_sha256,
+            manifest_sha256=receipt_sha256,
+            witness_status=WitnessStatus.LOCAL,
         )
 
     def witness(self, entry_hash: str, manifest_sha256: str, chain_prev: str | None) -> str:

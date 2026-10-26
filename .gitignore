@@ -17,8 +17,8 @@ htmlcov/
 node_modules/
 ui/dist/
 
-# Local data
-data/
+# Local data (repo root only; bi/data demo marts are committed)
+/data/
 .env
 
 # Generated datasets

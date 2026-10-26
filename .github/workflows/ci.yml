@@ -15,7 +15,7 @@ jobs:
           python-version: "3.12"
           cache: pip
       - name: Install package
-        run: pip install -e ".[dev]"
+        run: pip install -e ".[dev,synth,eval]"
       - name: Ruff lint
         run: ruff check .
       - name: Ruff format
@@ -26,6 +26,10 @@ jobs:
           git diff --exit-code schemas/
       - name: Pytest
         run: pytest -q
+      - name: BI demo smoke and ledger verify
+        run: |
+          python -m bi.demo --out bi/data
+          python -m ledger.verify --db bi/data/demo.db
       - name: Synthetic generator smoke
         run: python -m datasets.synth --n 50 --seed 7 --out datasets/generated
 
