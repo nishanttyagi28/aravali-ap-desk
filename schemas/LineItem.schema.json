@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "cess": {
+      "default": "0",
+      "title": "Cess",
+      "type": "string"
+    },
+    "cgst": {
+      "title": "Cgst",
+      "type": "string"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "gst_rate": {
+      "title": "Gst Rate",
+      "type": "string"
+    },
+    "hsn_sac": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Hsn Sac"
+    },
+    "igst": {
+      "title": "Igst",
+      "type": "string"
+    },
+    "qty": {
+      "title": "Qty",
+      "type": "string"
+    },
+    "sgst": {
+      "title": "Sgst",
+      "type": "string"
+    },
+    "taxable_value": {
+      "title": "Taxable Value",
+      "type": "string"
+    },
+    "total": {
+      "title": "Total",
+      "type": "string"
+    },
+    "unit_price": {
+      "title": "Unit Price",
+      "type": "string"
+    }
+  },
+  "required": [
+    "description",
+    "qty",
+    "unit_price",
+    "taxable_value",
+    "gst_rate",
+    "cgst",
+    "sgst",
+    "igst",
+    "total"
+  ],
+  "title": "LineItem",
+  "type": "object"
+}

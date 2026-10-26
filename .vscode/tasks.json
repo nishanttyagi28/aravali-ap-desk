@@ -1,0 +1,130 @@
+{
+  "version": "2.0.0",
+  "_comment": "Supervisor-owned (frozen). Runs the Aravali supervisor harness in E:\\aravali-supervisor. Agents may not edit .vscode/.",
+  "options": {
+    "cwd": "E:\\aravali-supervisor",
+    "env": {
+      "TEMP": "E:\\aravali-supervisor\\.tmp",
+      "TMP": "E:\\aravali-supervisor\\.tmp",
+      "npm_config_cache": "E:\\aravali-supervisor\\.cache\\npm",
+      "PIP_CACHE_DIR": "E:\\aravali-supervisor\\.cache\\pip"
+    }
+  },
+  "tasks": [
+    {
+      "label": "Agent: run M1 (lead)",
+      "type": "shell",
+      "command": "node node_modules/tsx/dist/cli.mjs run-agent.ts --step M1 --role lead --prompt prompts/m1-contracts.md",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agent: correction round",
+      "type": "shell",
+      "command": "node node_modules/tsx/dist/cli.mjs run-agent.ts --step ${input:step} --role ${input:role} --prompt ${input:prompt} --resume ${input:agentId} --correction",
+      "problemMatcher": []
+    },
+    {
+      "label": "Supervisor: create M2 worktrees",
+      "type": "shell",
+      "command": "powershell -NoProfile -File m2-worktrees.ps1",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agent: run M2-A (ingest+extract)",
+      "type": "shell",
+      "command": "$env:REPO_DIR='E:\\aravali-wt\\A'; node node_modules/tsx/dist/cli.mjs run-agent.ts --step M2 --role A --prompt prompts/m2-A-ingest-extract.md",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agent: run M2-B (validate+api+ledger)",
+      "type": "shell",
+      "command": "$env:REPO_DIR='E:\\aravali-wt\\B'; node node_modules/tsx/dist/cli.mjs run-agent.ts --step M2 --role B --prompt prompts/m2-B-validate-api-ledger.md",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agent: run M2-C (review UI)",
+      "type": "shell",
+      "command": "$env:REPO_DIR='E:\\aravali-wt\\C'; node node_modules/tsx/dist/cli.mjs run-agent.ts --step M2 --role C --prompt prompts/m2-C-review-ui.md",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agent: run M2-D (data+evals+CI)",
+      "type": "shell",
+      "command": "$env:REPO_DIR='E:\\aravali-wt\\D'; node node_modules/tsx/dist/cli.mjs run-agent.ts --step M2 --role D --prompt prompts/m2-D-data-evals-ci.md",
+      "problemMatcher": []
+    },
+    {
+      "label": "Gate: test",
+      "type": "shell",
+      "command": "node node_modules/tsx/dist/cli.mjs gate.ts manual",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Scope: check working tree",
+      "type": "shell",
+      "command": "node node_modules/tsx/dist/cli.mjs check-scope.ts ${input:role}",
+      "problemMatcher": []
+    },
+    {
+      "label": "Supervisor: approve & push",
+      "type": "shell",
+      "command": "node node_modules/tsx/dist/cli.mjs approve-and-push.ts --step ${input:step} --message \"${input:message}\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "Supervisor: budget & recent runs",
+      "type": "shell",
+      "command": "node node_modules/tsx/dist/cli.mjs budget.ts",
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "step",
+      "type": "pickString",
+      "description": "Milestone step",
+      "options": [
+        "M1",
+        "M2",
+        "M3",
+        "M4",
+        "M5"
+      ],
+      "default": "M1"
+    },
+    {
+      "id": "role",
+      "type": "pickString",
+      "description": "Agent role",
+      "options": [
+        "lead",
+        "A",
+        "B",
+        "C",
+        "D",
+        "supervisor"
+      ],
+      "default": "lead"
+    },
+    {
+      "id": "prompt",
+      "type": "promptString",
+      "description": "Prompt file (relative to E:\\aravali-supervisor)",
+      "default": "prompts/correction.md"
+    },
+    {
+      "id": "agentId",
+      "type": "promptString",
+      "description": "agentId to resume (see Supervisor: budget & recent runs)"
+    },
+    {
+      "id": "message",
+      "type": "promptString",
+      "description": "Commit message"
+    }
+  ]
+}

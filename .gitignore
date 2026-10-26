@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+
+# Virtualenv
+.venv/
+
+# Node (UI, M2)
+node_modules/
+ui/dist/
+
+# Local data
+data/
+.env
+
+# Generated datasets
+datasets/generated/
+
+# Power BI locks
+*.pbix.lock

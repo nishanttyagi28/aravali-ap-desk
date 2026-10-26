@@ -1,0 +1,66 @@
+{
+  "$defs": {
+    "Vendor": {
+      "additionalProperties": false,
+      "properties": {
+        "bank_last4": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bank Last4"
+        },
+        "gstin": {
+          "title": "Gstin",
+          "type": "string"
+        },
+        "legal_name": {
+          "title": "Legal Name",
+          "type": "string"
+        },
+        "pan": {
+          "title": "Pan",
+          "type": "string"
+        },
+        "state_code": {
+          "title": "State Code",
+          "type": "string"
+        },
+        "vendor_id": {
+          "title": "Vendor Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "vendor_id",
+        "legal_name",
+        "gstin",
+        "state_code",
+        "pan"
+      ],
+      "title": "Vendor",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "vendors": {
+      "items": {
+        "$ref": "#/$defs/Vendor"
+      },
+      "title": "Vendors",
+      "type": "array"
+    }
+  },
+  "required": [
+    "vendors"
+  ],
+  "title": "VendorMaster",
+  "type": "object"
+}

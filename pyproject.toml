@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aravali-ap-desk"
+version = "0.1.0"
+description = "Document AI pipeline for Indian GST vendor invoices"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "MIT" }
+dependencies = [
+    "pydantic>=2.7",
+    "fastapi",
+    "uvicorn",
+    "sqlalchemy>=2",
+    "pypdf",
+    "pdfplumber",
+    "reportlab",
+    "openpyxl",
+    "python-multipart",
+]
+
+[project.optional-dependencies]
+ocr = ["rapidocr-onnxruntime"]
+llm = ["groq", "httpx"]
+synth = ["pypdfium2", "Pillow"]
+eval = ["nishanttyagi-agenteval>=0.5,<0.6"]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "jsonschema",
+    "pyyaml",
+    "openapi-spec-validator",
+    "httpx",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["docai", "api", "ledger", "db", "datasets", "evals"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

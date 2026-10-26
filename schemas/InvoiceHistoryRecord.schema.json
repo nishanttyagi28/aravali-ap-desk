@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "financial_year": {
+      "title": "Financial Year",
+      "type": "string"
+    },
+    "invoice_id": {
+      "format": "uuid",
+      "title": "Invoice Id",
+      "type": "string"
+    },
+    "normalised_invoice_number": {
+      "title": "Normalised Invoice Number",
+      "type": "string"
+    },
+    "vendor_gstin": {
+      "title": "Vendor Gstin",
+      "type": "string"
+    }
+  },
+  "required": [
+    "vendor_gstin",
+    "normalised_invoice_number",
+    "financial_year",
+    "invoice_id"
+  ],
+  "title": "InvoiceHistoryRecord",
+  "type": "object"
+}

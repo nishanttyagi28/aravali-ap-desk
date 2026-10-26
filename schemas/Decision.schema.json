@@ -1,0 +1,137 @@
+{
+  "$defs": {
+    "DecidedBy": {
+      "enum": [
+        "engine",
+        "human"
+      ],
+      "title": "DecidedBy",
+      "type": "string"
+    },
+    "DecisionOutcome": {
+      "enum": [
+        "ALLOW",
+        "REVIEW",
+        "BLOCK"
+      ],
+      "title": "DecisionOutcome",
+      "type": "string"
+    },
+    "IssueCode": {
+      "enum": [
+        "GSTIN_CHECKSUM",
+        "GSTIN_STATE_MISMATCH",
+        "TAX_REGIME_MISMATCH",
+        "LINE_ARITHMETIC",
+        "TOTAL_MISMATCH",
+        "DUPLICATE_INVOICE",
+        "VENDOR_UNKNOWN",
+        "LOW_CONFIDENCE",
+        "MISSING_FIELD",
+        "ROUND_OFF_EXCEEDED"
+      ],
+      "title": "IssueCode",
+      "type": "string"
+    },
+    "IssueSeverity": {
+      "enum": [
+        "info",
+        "warn",
+        "error"
+      ],
+      "title": "IssueSeverity",
+      "type": "string"
+    },
+    "ValidationIssue": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/IssueCode"
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence"
+        },
+        "field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/IssueSeverity"
+        }
+      },
+      "required": [
+        "code",
+        "severity",
+        "message"
+      ],
+      "title": "ValidationIssue",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "decided_at": {
+      "format": "date-time",
+      "title": "Decided At",
+      "type": "string"
+    },
+    "decided_by": {
+      "$ref": "#/$defs/DecidedBy"
+    },
+    "invoice_id": {
+      "format": "uuid",
+      "title": "Invoice Id",
+      "type": "string"
+    },
+    "issues": {
+      "items": {
+        "$ref": "#/$defs/ValidationIssue"
+      },
+      "title": "Issues",
+      "type": "array"
+    },
+    "outcome": {
+      "$ref": "#/$defs/DecisionOutcome"
+    },
+    "reasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Reasons",
+      "type": "array"
+    }
+  },
+  "required": [
+    "invoice_id",
+    "outcome",
+    "issues",
+    "reasons",
+    "decided_by",
+    "decided_at"
+  ],
+  "title": "Decision",
+  "type": "object"
+}

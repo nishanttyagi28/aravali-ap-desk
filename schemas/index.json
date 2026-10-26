@@ -1,0 +1,20 @@
+{
+  "BBox": "BBox.schema.json",
+  "Decision": "Decision.schema.json",
+  "ErrorResponse": "ErrorResponse.schema.json",
+  "ExtractedField": "ExtractedField.schema.json",
+  "ExtractedInvoice": "ExtractedInvoice.schema.json",
+  "InvoiceHistory": "InvoiceHistory.schema.json",
+  "InvoiceHistoryRecord": "InvoiceHistoryRecord.schema.json",
+  "LedgerEntry": "LedgerEntry.schema.json",
+  "LineItem": "LineItem.schema.json",
+  "Metrics": "Metrics.schema.json",
+  "ReviewAction": "ReviewAction.schema.json",
+  "ReviewQueueItem": "ReviewQueueItem.schema.json",
+  "ReviewResult": "ReviewResult.schema.json",
+  "SealRef": "SealRef.schema.json",
+  "TruthRecord": "TruthRecord.schema.json",
+  "ValidationIssue": "ValidationIssue.schema.json",
+  "Vendor": "Vendor.schema.json",
+  "VendorMaster": "VendorMaster.schema.json"
+}

@@ -1,0 +1,43 @@
+{
+  "$defs": {
+    "ReviewActionType": {
+      "enum": [
+        "approve",
+        "correct",
+        "reject"
+      ],
+      "title": "ReviewActionType",
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "action": {
+      "$ref": "#/$defs/ReviewActionType"
+    },
+    "corrections": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Corrections"
+    },
+    "reviewer": {
+      "title": "Reviewer",
+      "type": "string"
+    }
+  },
+  "required": [
+    "action",
+    "reviewer"
+  ],
+  "title": "ReviewAction",
+  "type": "object"
+}

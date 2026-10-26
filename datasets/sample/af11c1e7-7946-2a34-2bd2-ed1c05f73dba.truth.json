@@ -1,0 +1,255 @@
+{
+  "bboxes": {
+    "buyer_gstin": {
+      "page": 1,
+      "x0": 155.90551181102364,
+      "x1": 249.82551181102363,
+      "y0": 700.9921259842521,
+      "y1": 712.9921259842521
+    },
+    "cgst_total": {
+      "page": 1,
+      "x0": 439.3700787401575,
+      "x1": 464.3900787401575,
+      "y0": 550.7559055118112,
+      "y1": 562.7559055118112
+    },
+    "grand_total": {
+      "page": 1,
+      "x0": 439.3700787401575,
+      "x1": 478.2900787401575,
+      "y0": 516.7401574803151,
+      "y1": 528.7401574803151
+    },
+    "invoice_date": {
+      "page": 1,
+      "x0": 155.90551181102364,
+      "x1": 207.04551181102363,
+      "y0": 649.968503937008,
+      "y1": 661.968503937008
+    },
+    "invoice_number": {
+      "page": 1,
+      "x0": 155.90551181102364,
+      "x1": 212.59551181102364,
+      "y0": 666.976377952756,
+      "y1": 678.976377952756
+    },
+    "place_of_supply_state_code": {
+      "page": 1,
+      "x0": 155.90551181102364,
+      "x1": 167.02551181102365,
+      "y0": 683.984251968504,
+      "y1": 695.984251968504
+    },
+    "sgst_total": {
+      "page": 1,
+      "x0": 439.3700787401575,
+      "x1": 464.3900787401575,
+      "y0": 533.7480314960632,
+      "y1": 545.7480314960632
+    },
+    "taxable_total": {
+      "page": 1,
+      "x0": 439.3700787401575,
+      "x1": 478.2900787401575,
+      "y0": 567.7637795275592,
+      "y1": 579.7637795275592
+    },
+    "vendor_gstin": {
+      "page": 1,
+      "x0": 155.90551181102364,
+      "x1": 250.38551181102366,
+      "y0": 740.6771653543308,
+      "y1": 752.6771653543308
+    }
+  },
+  "duplicate_of": null,
+  "expected_decision": "ALLOW",
+  "expected_issue_codes": [],
+  "invoice": {
+    "buyer_gstin": "07PWCEK1092N1ZJ",
+    "cess_total": "0",
+    "cgst_total": "81.25",
+    "currency": "INR",
+    "extractor_version": "synth-v0",
+    "fields": {
+      "buyer_gstin": {
+        "bbox": {
+          "page": 1,
+          "x0": 155.90551181102364,
+          "x1": 249.82551181102363,
+          "y0": 700.9921259842521,
+          "y1": 712.9921259842521
+        },
+        "confidence": 0.99,
+        "name": "buyer_gstin",
+        "raw_text": "07PWCEK1092N1ZJ",
+        "source": "text_layer",
+        "value": "07PWCEK1092N1ZJ"
+      },
+      "cgst_total": {
+        "bbox": {
+          "page": 1,
+          "x0": 439.3700787401575,
+          "x1": 464.3900787401575,
+          "y0": 550.7559055118112,
+          "y1": 562.7559055118112
+        },
+        "confidence": 0.99,
+        "name": "cgst_total",
+        "raw_text": "81.25",
+        "source": "text_layer",
+        "value": "81.25"
+      },
+      "grand_total": {
+        "bbox": {
+          "page": 1,
+          "x0": 439.3700787401575,
+          "x1": 478.2900787401575,
+          "y0": 516.7401574803151,
+          "y1": 528.7401574803151
+        },
+        "confidence": 0.99,
+        "name": "grand_total",
+        "raw_text": "3412.50",
+        "source": "text_layer",
+        "value": "3412.50"
+      },
+      "igst_total": {
+        "bbox": null,
+        "confidence": 0.99,
+        "name": "igst_total",
+        "raw_text": "0.00",
+        "source": "text_layer",
+        "value": "0.00"
+      },
+      "invoice_date": {
+        "bbox": {
+          "page": 1,
+          "x0": 155.90551181102364,
+          "x1": 207.04551181102363,
+          "y0": 649.968503937008,
+          "y1": 661.968503937008
+        },
+        "confidence": 0.99,
+        "name": "invoice_date",
+        "raw_text": "2025-04-03",
+        "source": "text_layer",
+        "value": "2025-04-03"
+      },
+      "invoice_number": {
+        "bbox": {
+          "page": 1,
+          "x0": 155.90551181102364,
+          "x1": 212.59551181102364,
+          "y0": 666.976377952756,
+          "y1": 678.976377952756
+        },
+        "confidence": 0.99,
+        "name": "invoice_number",
+        "raw_text": "INV-99-0003",
+        "source": "text_layer",
+        "value": "INV-99-0003"
+      },
+      "place_of_supply_state_code": {
+        "bbox": {
+          "page": 1,
+          "x0": 155.90551181102364,
+          "x1": 167.02551181102365,
+          "y0": 683.984251968504,
+          "y1": 695.984251968504
+        },
+        "confidence": 0.99,
+        "name": "place_of_supply_state_code",
+        "raw_text": "29",
+        "source": "text_layer",
+        "value": "29"
+      },
+      "sgst_total": {
+        "bbox": {
+          "page": 1,
+          "x0": 439.3700787401575,
+          "x1": 464.3900787401575,
+          "y0": 533.7480314960632,
+          "y1": 545.7480314960632
+        },
+        "confidence": 0.99,
+        "name": "sgst_total",
+        "raw_text": "81.25",
+        "source": "text_layer",
+        "value": "81.25"
+      },
+      "taxable_total": {
+        "bbox": {
+          "page": 1,
+          "x0": 439.3700787401575,
+          "x1": 478.2900787401575,
+          "y0": 567.7637795275592,
+          "y1": 579.7637795275592
+        },
+        "confidence": 0.99,
+        "name": "taxable_total",
+        "raw_text": "3250.00",
+        "source": "text_layer",
+        "value": "3250.00"
+      },
+      "vendor_gstin": {
+        "bbox": {
+          "page": 1,
+          "x0": 155.90551181102364,
+          "x1": 250.38551181102366,
+          "y0": 740.6771653543308,
+          "y1": 752.6771653543308
+        },
+        "confidence": 0.99,
+        "name": "vendor_gstin",
+        "raw_text": "29ZVUGM7358X1ZK",
+        "source": "text_layer",
+        "value": "29ZVUGM7358X1ZK"
+      }
+    },
+    "grand_total": "3412.50",
+    "igst_total": "0.00",
+    "invoice_date": "2025-04-03",
+    "invoice_id": "af11c1e7-7946-2a34-2bd2-ed1c05f73dba",
+    "invoice_number": "INV-99-0003",
+    "line_items": [
+      {
+        "cess": "0",
+        "cgst": "56.25",
+        "description": "Item 1 \u2014 Industrial goods",
+        "gst_rate": "5",
+        "hsn_sac": "4289",
+        "igst": "0",
+        "qty": "9",
+        "sgst": "56.25",
+        "taxable_value": "2250.00",
+        "total": "2362.50",
+        "unit_price": "250"
+      },
+      {
+        "cess": "0",
+        "cgst": "25.00",
+        "description": "Item 2 \u2014 Industrial goods",
+        "gst_rate": "5",
+        "hsn_sac": "5220",
+        "igst": "0",
+        "qty": "4",
+        "sgst": "25.00",
+        "taxable_value": "1000.00",
+        "total": "1050.00",
+        "unit_price": "250"
+      }
+    ],
+    "mode": "offline",
+    "page_count": 1,
+    "place_of_supply_state_code": "29",
+    "round_off": "0",
+    "sgst_total": "81.25",
+    "sha256": "41587b9848f46d592cf4d346cdc41105c37bf1b3ce2ae0a09057b4fb27ab05f2",
+    "source_file": "af11c1e7-7946-2a34-2bd2-ed1c05f73dba.pdf",
+    "taxable_total": "3250.00",
+    "vendor_gstin": "29ZVUGM7358X1ZK"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "vendors": [
+    {
+      "bank_last4": "1000",
+      "gstin": "07NNGVF4772H1Z9",
+      "legal_name": "Aravali Supplies 1 Pvt Ltd",
+      "pan": "NNGVF4772H",
+      "state_code": "07",
+      "vendor_id": "V001"
+    },
+    {
+      "bank_last4": "1001",
+      "gstin": "09ECJZN9696X1Z4",
+      "legal_name": "Aravali Supplies 2 Pvt Ltd",
+      "pan": "ECJZN9696X",
+      "state_code": "09",
+      "vendor_id": "V002"
+    },
+    {
+      "bank_last4": "1002",
+      "gstin": "27YTCVR4268P1ZW",
+      "legal_name": "Aravali Supplies 3 Pvt Ltd",
+      "pan": "YTCVR4268P",
+      "state_code": "27",
+      "vendor_id": "V003"
+    },
+    {
+      "bank_last4": "1003",
+      "gstin": "29ZVUGM7358X1ZK",
+      "legal_name": "Aravali Supplies 4 Pvt Ltd",
+      "pan": "ZVUGM7358X",
+      "state_code": "29",
+      "vendor_id": "V004"
+    },
+    {
+      "bank_last4": "1004",
+      "gstin": "33GEQXF6551C1Z3",
+      "legal_name": "Aravali Supplies 5 Pvt Ltd",
+      "pan": "GEQXF6551C",
+      "state_code": "33",
+      "vendor_id": "V005"
+    }
+  ]
+}

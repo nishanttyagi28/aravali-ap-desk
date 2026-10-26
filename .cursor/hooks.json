@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "matcher": "Write|Delete|Edit|StrReplace|MultiEdit|NotebookEdit",
+        "command": "python .cursor/hooks/scope_guard.py",
+        "failClosed": true
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "python .cursor/hooks/scope_guard.py --shell",
+        "failClosed": true
+      }
+    ]
+  }
+}

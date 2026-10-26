@@ -1,0 +1,44 @@
+{
+  "case_counts": {
+    "bad_gstin_checksum": 1,
+    "clean_interstate": 1,
+    "clean_intrastate": 2,
+    "duplicate_invoice": 1,
+    "line_arithmetic": 1
+  },
+  "count": 6,
+  "generator_version": "synth-v0",
+  "invoices": [
+    {
+      "case": "clean_intrastate",
+      "duplicate_of": null,
+      "id": "ad689cf8-8759-f153-b778-5728f2655b19"
+    },
+    {
+      "case": "clean_interstate",
+      "duplicate_of": null,
+      "id": "9b02a56d-32b5-5d35-e676-46f184c69290"
+    },
+    {
+      "case": "clean_intrastate",
+      "duplicate_of": null,
+      "id": "af11c1e7-7946-2a34-2bd2-ed1c05f73dba"
+    },
+    {
+      "case": "duplicate_invoice",
+      "duplicate_of": "ad689cf8-8759-f153-b778-5728f2655b19",
+      "id": "c3881083-d33b-f820-6770-fa788ba3fb80"
+    },
+    {
+      "case": "bad_gstin_checksum",
+      "duplicate_of": null,
+      "id": "e163e7ce-3523-eb0d-ec94-09ff25403cfd"
+    },
+    {
+      "case": "line_arithmetic",
+      "duplicate_of": null,
+      "id": "662b78f5-6081-62c3-3760-e39956622305"
+    }
+  ],
+  "seed": 99
+}

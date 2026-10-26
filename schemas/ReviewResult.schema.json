@@ -1,0 +1,489 @@
+{
+  "$defs": {
+    "BBox": {
+      "additionalProperties": false,
+      "description": "Axis-aligned rectangle on a PDF page.\n\nCoordinate convention: PDF user space of the **unrotated** page, units = points,\norigin **bottom-left**, *y* increases upward (reportlab / pypdf). Producers using\ntop-left tools (e.g. pdfplumber ``top``/``bottom`` or OCR pixels) must convert:\n``y0 = page_height - bottom``, ``y1 = page_height - top``.",
+      "properties": {
+        "page": {
+          "minimum": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "x0": {
+          "title": "X0",
+          "type": "number"
+        },
+        "x1": {
+          "title": "X1",
+          "type": "number"
+        },
+        "y0": {
+          "title": "Y0",
+          "type": "number"
+        },
+        "y1": {
+          "title": "Y1",
+          "type": "number"
+        }
+      },
+      "required": [
+        "page",
+        "x0",
+        "y0",
+        "x1",
+        "y1"
+      ],
+      "title": "BBox",
+      "type": "object"
+    },
+    "DecidedBy": {
+      "enum": [
+        "engine",
+        "human"
+      ],
+      "title": "DecidedBy",
+      "type": "string"
+    },
+    "Decision": {
+      "additionalProperties": false,
+      "properties": {
+        "decided_at": {
+          "format": "date-time",
+          "title": "Decided At",
+          "type": "string"
+        },
+        "decided_by": {
+          "$ref": "#/$defs/DecidedBy"
+        },
+        "invoice_id": {
+          "format": "uuid",
+          "title": "Invoice Id",
+          "type": "string"
+        },
+        "issues": {
+          "items": {
+            "$ref": "#/$defs/ValidationIssue"
+          },
+          "title": "Issues",
+          "type": "array"
+        },
+        "outcome": {
+          "$ref": "#/$defs/DecisionOutcome"
+        },
+        "reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "invoice_id",
+        "outcome",
+        "issues",
+        "reasons",
+        "decided_by",
+        "decided_at"
+      ],
+      "title": "Decision",
+      "type": "object"
+    },
+    "DecisionOutcome": {
+      "enum": [
+        "ALLOW",
+        "REVIEW",
+        "BLOCK"
+      ],
+      "title": "DecisionOutcome",
+      "type": "string"
+    },
+    "ExtractedField": {
+      "additionalProperties": false,
+      "description": "One extracted scalar with provenance.",
+      "properties": {
+        "bbox": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BBox"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "raw_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Text"
+        },
+        "source": {
+          "$ref": "#/$defs/FieldSource"
+        },
+        "value": {
+          "title": "Value"
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "confidence",
+        "source"
+      ],
+      "title": "ExtractedField",
+      "type": "object"
+    },
+    "ExtractedInvoice": {
+      "additionalProperties": false,
+      "properties": {
+        "buyer_gstin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Buyer Gstin"
+        },
+        "cess_total": {
+          "default": "0",
+          "title": "Cess Total",
+          "type": "string"
+        },
+        "cgst_total": {
+          "title": "Cgst Total",
+          "type": "string"
+        },
+        "currency": {
+          "default": "INR",
+          "title": "Currency",
+          "type": "string"
+        },
+        "extractor_version": {
+          "title": "Extractor Version",
+          "type": "string"
+        },
+        "fields": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ExtractedField"
+          },
+          "title": "Fields",
+          "type": "object"
+        },
+        "grand_total": {
+          "title": "Grand Total",
+          "type": "string"
+        },
+        "igst_total": {
+          "title": "Igst Total",
+          "type": "string"
+        },
+        "invoice_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Invoice Date"
+        },
+        "invoice_id": {
+          "format": "uuid",
+          "title": "Invoice Id",
+          "type": "string"
+        },
+        "invoice_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Invoice Number"
+        },
+        "line_items": {
+          "items": {
+            "$ref": "#/$defs/LineItem"
+          },
+          "title": "Line Items",
+          "type": "array"
+        },
+        "mode": {
+          "$ref": "#/$defs/ExtractionMode"
+        },
+        "page_count": {
+          "minimum": 1,
+          "title": "Page Count",
+          "type": "integer"
+        },
+        "place_of_supply_state_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Place Of Supply State Code"
+        },
+        "round_off": {
+          "default": "0",
+          "title": "Round Off",
+          "type": "string"
+        },
+        "sgst_total": {
+          "title": "Sgst Total",
+          "type": "string"
+        },
+        "sha256": {
+          "title": "Sha256",
+          "type": "string"
+        },
+        "source_file": {
+          "title": "Source File",
+          "type": "string"
+        },
+        "taxable_total": {
+          "title": "Taxable Total",
+          "type": "string"
+        },
+        "vendor_gstin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Vendor Gstin"
+        }
+      },
+      "required": [
+        "invoice_id",
+        "source_file",
+        "sha256",
+        "page_count",
+        "line_items",
+        "taxable_total",
+        "cgst_total",
+        "sgst_total",
+        "igst_total",
+        "grand_total",
+        "fields",
+        "extractor_version",
+        "mode"
+      ],
+      "title": "ExtractedInvoice",
+      "type": "object"
+    },
+    "ExtractionMode": {
+      "enum": [
+        "offline",
+        "llm"
+      ],
+      "title": "ExtractionMode",
+      "type": "string"
+    },
+    "FieldSource": {
+      "enum": [
+        "text_layer",
+        "ocr",
+        "llm",
+        "rule"
+      ],
+      "title": "FieldSource",
+      "type": "string"
+    },
+    "IssueCode": {
+      "enum": [
+        "GSTIN_CHECKSUM",
+        "GSTIN_STATE_MISMATCH",
+        "TAX_REGIME_MISMATCH",
+        "LINE_ARITHMETIC",
+        "TOTAL_MISMATCH",
+        "DUPLICATE_INVOICE",
+        "VENDOR_UNKNOWN",
+        "LOW_CONFIDENCE",
+        "MISSING_FIELD",
+        "ROUND_OFF_EXCEEDED"
+      ],
+      "title": "IssueCode",
+      "type": "string"
+    },
+    "IssueSeverity": {
+      "enum": [
+        "info",
+        "warn",
+        "error"
+      ],
+      "title": "IssueSeverity",
+      "type": "string"
+    },
+    "LineItem": {
+      "additionalProperties": false,
+      "properties": {
+        "cess": {
+          "default": "0",
+          "title": "Cess",
+          "type": "string"
+        },
+        "cgst": {
+          "title": "Cgst",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "gst_rate": {
+          "title": "Gst Rate",
+          "type": "string"
+        },
+        "hsn_sac": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Hsn Sac"
+        },
+        "igst": {
+          "title": "Igst",
+          "type": "string"
+        },
+        "qty": {
+          "title": "Qty",
+          "type": "string"
+        },
+        "sgst": {
+          "title": "Sgst",
+          "type": "string"
+        },
+        "taxable_value": {
+          "title": "Taxable Value",
+          "type": "string"
+        },
+        "total": {
+          "title": "Total",
+          "type": "string"
+        },
+        "unit_price": {
+          "title": "Unit Price",
+          "type": "string"
+        }
+      },
+      "required": [
+        "description",
+        "qty",
+        "unit_price",
+        "taxable_value",
+        "gst_rate",
+        "cgst",
+        "sgst",
+        "igst",
+        "total"
+      ],
+      "title": "LineItem",
+      "type": "object"
+    },
+    "ValidationIssue": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/IssueCode"
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence"
+        },
+        "field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/IssueSeverity"
+        }
+      },
+      "required": [
+        "code",
+        "severity",
+        "message"
+      ],
+      "title": "ValidationIssue",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "decision": {
+      "$ref": "#/$defs/Decision"
+    },
+    "invoice": {
+      "$ref": "#/$defs/ExtractedInvoice"
+    }
+  },
+  "required": [
+    "decision",
+    "invoice"
+  ],
+  "title": "ReviewResult",
+  "type": "object"
+}

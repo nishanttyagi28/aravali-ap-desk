@@ -1,0 +1,47 @@
+{
+  "$defs": {
+    "SealProvider": {
+      "enum": [
+        "stub",
+        "karmasakshi"
+      ],
+      "title": "SealProvider",
+      "type": "string"
+    },
+    "WitnessStatus": {
+      "enum": [
+        "pending",
+        "witnessed",
+        "failed"
+      ],
+      "title": "WitnessStatus",
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "commit_id": {
+      "title": "Commit Id",
+      "type": "string"
+    },
+    "manifest_sha256": {
+      "title": "Manifest Sha256",
+      "type": "string"
+    },
+    "provider": {
+      "$ref": "#/$defs/SealProvider"
+    },
+    "witness_status": {
+      "$ref": "#/$defs/WitnessStatus"
+    }
+  },
+  "required": [
+    "provider",
+    "commit_id",
+    "manifest_sha256",
+    "witness_status"
+  ],
+  "title": "SealRef",
+  "type": "object"
+}

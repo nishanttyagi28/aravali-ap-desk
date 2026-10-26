@@ -1,0 +1,221 @@
+openapi: 3.1.0
+info:
+  title: Aravali AP Desk API
+  version: 0.1.0
+  description: GST vendor invoice ingest, validation, review, and ledger posting (M1 contract stub).
+servers:
+  - url: http://localhost:8000
+paths:
+  /invoices:
+    post:
+      operationId: uploadInvoice
+      summary: Upload a PDF invoice for extraction and validation
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: PDF invoice (max 10 MB)
+      responses:
+        "200":
+          description: Extracted invoice and engine decision
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceWithDecision"
+        "413":
+          $ref: "#/components/responses/TooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedMedia"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /invoices/{invoice_id}:
+    get:
+      operationId: getInvoice
+      summary: Fetch extracted invoice and latest decision
+      parameters:
+        - $ref: "#/components/parameters/InvoiceId"
+      responses:
+        "200":
+          description: Invoice and decision
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceWithDecision"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /invoices/{invoice_id}/file:
+    get:
+      operationId: getInvoiceFile
+      summary: Download original uploaded PDF
+      parameters:
+        - $ref: "#/components/parameters/InvoiceId"
+      responses:
+        "200":
+          description: Original PDF bytes
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /review-queue:
+    get:
+      operationId: listReviewQueue
+      summary: Review queue items
+      parameters:
+        - name: decision
+          in: query
+          required: false
+          schema:
+            $ref: "schemas/Decision.schema.json#/properties/outcome"
+          description: Filter by decision outcome (repeatable)
+        - name: issue_code
+          in: query
+          required: false
+          schema:
+            $ref: "schemas/ValidationIssue.schema.json#/properties/code"
+          description: Filter by validation issue code (repeatable)
+      responses:
+        "200":
+          description: Queue items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "schemas/ReviewQueueItem.schema.json"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /invoices/{invoice_id}/review:
+    post:
+      operationId: reviewInvoice
+      summary: Apply human review action and re-validate
+      parameters:
+        - $ref: "#/components/parameters/InvoiceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "schemas/ReviewAction.schema.json"
+      responses:
+        "200":
+          description: Updated decision and invoice
+          content:
+            application/json:
+              schema:
+                $ref: "schemas/ReviewResult.schema.json"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Conflict (e.g. approve BLOCK without clearing issues)
+          content:
+            application/json:
+              schema:
+                $ref: "schemas/ErrorResponse.schema.json"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /invoices/{invoice_id}/post:
+    post:
+      operationId: postInvoice
+      summary: Post an ALLOW-approved invoice to the ledger
+      parameters:
+        - $ref: "#/components/parameters/InvoiceId"
+      responses:
+        "200":
+          description: Ledger entry
+          content:
+            application/json:
+              schema:
+                $ref: "schemas/LedgerEntry.schema.json"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Not postable or already posted
+          content:
+            application/json:
+              schema:
+                $ref: "schemas/ErrorResponse.schema.json"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /metrics:
+    get:
+      operationId: getMetrics
+      summary: Processing metrics snapshot
+      responses:
+        "200":
+          description: Metrics
+          content:
+            application/json:
+              schema:
+                $ref: "schemas/Metrics.schema.json"
+        "500":
+          $ref: "#/components/responses/InternalError"
+components:
+  parameters:
+    InvoiceId:
+      name: invoice_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    InvoiceWithDecision:
+      type: object
+      required: [invoice, decision]
+      additionalProperties: false
+      properties:
+        invoice:
+          $ref: "schemas/ExtractedInvoice.schema.json"
+        decision:
+          $ref: "schemas/Decision.schema.json"
+    ErrorResponse:
+      $ref: "schemas/ErrorResponse.schema.json"
+  responses:
+    NotFound:
+      description: Unknown invoice_id
+      content:
+        application/json:
+          schema:
+            $ref: "schemas/ErrorResponse.schema.json"
+    ValidationError:
+      description: Request body validation failed
+      content:
+        application/json:
+          schema:
+            $ref: "schemas/ErrorResponse.schema.json"
+    TooLarge:
+      description: Upload exceeds 10 MB
+      content:
+        application/json:
+          schema:
+            $ref: "schemas/ErrorResponse.schema.json"
+    UnsupportedMedia:
+      description: Not a PDF
+      content:
+        application/json:
+          schema:
+            $ref: "schemas/ErrorResponse.schema.json"
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "schemas/ErrorResponse.schema.json"

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "allow_count": {
+      "minimum": 0,
+      "title": "Allow Count",
+      "type": "integer"
+    },
+    "block_count": {
+      "minimum": 0,
+      "title": "Block Count",
+      "type": "integer"
+    },
+    "invoices_processed": {
+      "minimum": 0,
+      "title": "Invoices Processed",
+      "type": "integer"
+    },
+    "posted_count": {
+      "minimum": 0,
+      "title": "Posted Count",
+      "type": "integer"
+    },
+    "queue_depth": {
+      "minimum": 0,
+      "title": "Queue Depth",
+      "type": "integer"
+    },
+    "review_count": {
+      "minimum": 0,
+      "title": "Review Count",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "invoices_processed",
+    "allow_count",
+    "review_count",
+    "block_count",
+    "posted_count",
+    "queue_depth"
+  ],
+  "title": "Metrics",
+  "type": "object"
+}

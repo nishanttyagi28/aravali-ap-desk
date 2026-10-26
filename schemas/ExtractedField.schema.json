@@ -1,0 +1,102 @@
+{
+  "$defs": {
+    "BBox": {
+      "additionalProperties": false,
+      "description": "Axis-aligned rectangle on a PDF page.\n\nCoordinate convention: PDF user space of the **unrotated** page, units = points,\norigin **bottom-left**, *y* increases upward (reportlab / pypdf). Producers using\ntop-left tools (e.g. pdfplumber ``top``/``bottom`` or OCR pixels) must convert:\n``y0 = page_height - bottom``, ``y1 = page_height - top``.",
+      "properties": {
+        "page": {
+          "minimum": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "x0": {
+          "title": "X0",
+          "type": "number"
+        },
+        "x1": {
+          "title": "X1",
+          "type": "number"
+        },
+        "y0": {
+          "title": "Y0",
+          "type": "number"
+        },
+        "y1": {
+          "title": "Y1",
+          "type": "number"
+        }
+      },
+      "required": [
+        "page",
+        "x0",
+        "y0",
+        "x1",
+        "y1"
+      ],
+      "title": "BBox",
+      "type": "object"
+    },
+    "FieldSource": {
+      "enum": [
+        "text_layer",
+        "ocr",
+        "llm",
+        "rule"
+      ],
+      "title": "FieldSource",
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "One extracted scalar with provenance.",
+  "properties": {
+    "bbox": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BBox"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "confidence": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "raw_text": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Raw Text"
+    },
+    "source": {
+      "$ref": "#/$defs/FieldSource"
+    },
+    "value": {
+      "title": "Value"
+    }
+  },
+  "required": [
+    "name",
+    "value",
+    "confidence",
+    "source"
+  ],
+  "title": "ExtractedField",
+  "type": "object"
+}

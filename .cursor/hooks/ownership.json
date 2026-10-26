@@ -1,0 +1,47 @@
+{
+  "supervisor_only": [
+    ".vscode",
+    ".githooks",
+    ".git"
+  ],
+  "frozen": [
+    "schemas",
+    "openapi.yaml",
+    "pyproject.toml",
+    "AGENTS.md",
+    ".cursor",
+    "docai/contracts",
+    "docai/__init__.py",
+    "scripts"
+  ],
+  "roles": {
+    "A": [
+      "docai/ingest",
+      "docai/extract",
+      "tests/ingest",
+      "tests/extract"
+    ],
+    "B": [
+      "docai/validate",
+      "api",
+      "ledger",
+      "db",
+      "tests/validate",
+      "tests/api",
+      "tests/ledger",
+      "tests/db"
+    ],
+    "C": [
+      "ui"
+    ],
+    "D": [
+      "datasets",
+      "evals",
+      ".github",
+      "bi",
+      "docs",
+      "tests/datasets",
+      "tests/evals"
+    ]
+  }
+}

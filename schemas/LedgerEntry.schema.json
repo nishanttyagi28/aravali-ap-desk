@@ -1,0 +1,113 @@
+{
+  "$defs": {
+    "SealProvider": {
+      "enum": [
+        "stub",
+        "karmasakshi"
+      ],
+      "title": "SealProvider",
+      "type": "string"
+    },
+    "SealRef": {
+      "additionalProperties": false,
+      "properties": {
+        "commit_id": {
+          "title": "Commit Id",
+          "type": "string"
+        },
+        "manifest_sha256": {
+          "title": "Manifest Sha256",
+          "type": "string"
+        },
+        "provider": {
+          "$ref": "#/$defs/SealProvider"
+        },
+        "witness_status": {
+          "$ref": "#/$defs/WitnessStatus"
+        }
+      },
+      "required": [
+        "provider",
+        "commit_id",
+        "manifest_sha256",
+        "witness_status"
+      ],
+      "title": "SealRef",
+      "type": "object"
+    },
+    "WitnessStatus": {
+      "enum": [
+        "pending",
+        "witnessed",
+        "failed"
+      ],
+      "title": "WitnessStatus",
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "cess_total": {
+      "title": "Cess Total",
+      "type": "string"
+    },
+    "cgst_total": {
+      "title": "Cgst Total",
+      "type": "string"
+    },
+    "entry_id": {
+      "format": "uuid",
+      "title": "Entry Id",
+      "type": "string"
+    },
+    "grand_total": {
+      "title": "Grand Total",
+      "type": "string"
+    },
+    "igst_total": {
+      "title": "Igst Total",
+      "type": "string"
+    },
+    "invoice_id": {
+      "format": "uuid",
+      "title": "Invoice Id",
+      "type": "string"
+    },
+    "posted_at": {
+      "format": "date-time",
+      "title": "Posted At",
+      "type": "string"
+    },
+    "seal": {
+      "$ref": "#/$defs/SealRef"
+    },
+    "sgst_total": {
+      "title": "Sgst Total",
+      "type": "string"
+    },
+    "taxable_total": {
+      "title": "Taxable Total",
+      "type": "string"
+    },
+    "vendor_id": {
+      "title": "Vendor Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "entry_id",
+    "invoice_id",
+    "vendor_id",
+    "taxable_total",
+    "cgst_total",
+    "sgst_total",
+    "igst_total",
+    "cess_total",
+    "grand_total",
+    "posted_at",
+    "seal"
+  ],
+  "title": "LedgerEntry",
+  "type": "object"
+}
