@@ -530,6 +530,7 @@ def generate_dataset(
         truth_path.write_text(
             json.dumps(truth.model_dump(mode="json"), indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
+            newline="\n",
         )
         manifest_invoices.append(
             {
@@ -544,6 +545,7 @@ def generate_dataset(
     (out_dir / "vendor_master.json").write_text(
         json.dumps(master.model_dump(mode="json"), indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
+        newline="\n",
     )
     public_invoices = [
         {k: v for k, v in row.items() if not k.startswith("_")} for row in manifest_invoices
@@ -558,6 +560,7 @@ def generate_dataset(
     (out_dir / "manifest.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
+        newline="\n",
     )
     return manifest
 

@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -123,11 +124,23 @@ _PATH_NO_ROLE = [
 ]
 
 # --- OUTSIDE_WORKSPACE ---
+_OUTSIDE_ABS = str(Path(tempfile.gettempdir()).resolve() / "aad-scope-guard-outside.py")
+
 _PATH_OUTSIDE = [
     ("parent-escape", "A", _path_tool("../outside.py"), "deny", "AAD-SCOPE-005"),
     ("dotdot-escape", "A", _path_tool("docai/ingest/../../x.py"), "deny", "AAD-SCOPE-005"),
-    ("abs-outside", "A", _path_tool("C:/Windows/not-in-workspace.py"), "deny", "AAD-SCOPE-005"),
+    ("abs-outside", "A", _path_tool(_OUTSIDE_ABS), "deny", "AAD-SCOPE-005"),
 ]
+if sys.platform == "win32":
+    _PATH_OUTSIDE.append(
+        (
+            "abs-outside-win32-drive",
+            "A",
+            _path_tool("C:/Windows/not-in-workspace.py"),
+            "deny",
+            "AAD-SCOPE-005",
+        )
+    )
 
 # --- INVALID_INPUT + path keys ---
 _PATH_INVALID_AND_KEYS = [
@@ -264,20 +277,6 @@ _SHELL_CASES.extend(
             "allow",
             None,
         ),
-        (
-            "shell-002-venv-win",
-            "A",
-            _shell_body(r'.venv\Scripts\python -m pip install -e ".[dev]"'),
-            "allow",
-            None,
-        ),
-        (
-            "shell-002-venv-unix",
-            "A",
-            _shell_body('.venv/bin/python -m pip install -e ".[dev]"'),
-            "allow",
-            None,
-        ),
         ("shell-npm-run-all", "A", _shell_body("npm run lint"), "allow", None),
         ("shell-pytest-all", "A", _shell_body("python -m pytest -q"), "allow", None),
         ("shell-ruff-all", "A", _shell_body("ruff check ."), "allow", None),
@@ -288,6 +287,27 @@ _SHELL_CASES.extend(
         ("shell-003-pip", "lead", _shell_body("pip install requests"), "allow", None),
     ]
 )
+
+if sys.platform == "win32":
+    _SHELL_CASES.append(
+        (
+            "shell-002-venv-win",
+            "A",
+            _shell_body(r'.venv\Scripts\python -m pip install -e ".[dev]"'),
+            "allow",
+            None,
+        )
+    )
+else:
+    _SHELL_CASES.append(
+        (
+            "shell-002-venv-unix",
+            "A",
+            _shell_body('.venv/bin/python -m pip install -e ".[dev]"'),
+            "allow",
+            None,
+        )
+    )
 
 
 @pytest.mark.parametrize(

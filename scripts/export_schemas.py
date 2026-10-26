@@ -52,10 +52,14 @@ def export_to(schemas_dir: Path) -> None:
         schema["title"] = name
         path = schemas_dir / f"{name}.schema.json"
         text = json.dumps(schema, indent=2, sort_keys=True) + "\n"
-        path.write_text(text, encoding="utf-8")
+        path.write_text(text, encoding="utf-8", newline="\n")
         index[name] = f"{name}.schema.json"
     index_path = schemas_dir / "index.json"
-    index_path.write_text(json.dumps(index, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    index_path.write_text(
+        json.dumps(index, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
 
 
 def main() -> int:
