@@ -12,7 +12,7 @@
     "typecheck": "tsc -b --noEmit",
     "test": "vitest",
     "gen:api": "openapi-typescript ../openapi.yaml -o src/api/schema.d.ts",
-    "fixtures": "node scripts/copy-fixtures.mjs",
+    "fixtures": "node scripts/copy-fixtures.mjs && node scripts/build-mock-data.mjs",
     "postinstall": "node scripts/copy-fixtures.mjs"
   },
   "dependencies": {

@@ -5,7 +5,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 CI_PATH = ROOT / ".github" / "workflows" / "ci.yml"
 
-REQUIRED_JOBS = ("test", "frozen-files", "evals", "ui")
+REQUIRED_JOBS = ("test", "frozen-files", "evals", "ocr", "ui")
 
 
 def test_ci_workflow_required_jobs_and_no_job_level_hashfiles() -> None:

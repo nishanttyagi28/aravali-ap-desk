@@ -14,12 +14,12 @@ BLOCK_CODES: frozenset[IssueCode] = frozenset(
         IssueCode.DUPLICATE_INVOICE,
         IssueCode.LINE_ARITHMETIC,
         IssueCode.TOTAL_MISMATCH,
-        IssueCode.VENDOR_UNKNOWN,
     }
 )
 
 REVIEW_CODES: frozenset[IssueCode] = frozenset(
     {
+        IssueCode.VENDOR_UNKNOWN,
         IssueCode.ROUND_OFF_EXCEEDED,
         IssueCode.LOW_CONFIDENCE,
         IssueCode.MISSING_FIELD,

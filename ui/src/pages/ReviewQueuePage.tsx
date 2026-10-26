@@ -3,6 +3,7 @@ import { api, ApiError, type ReviewQueueItem } from "../api/client";
 import { MetricsStrip } from "../components/MetricsStrip";
 import { QueueTable, type QueueFilters } from "../components/QueueTable";
 import { useToast } from "../components/Toast/ToastContext";
+import { INVOICES_CHANGED } from "../lib/invoiceEvents";
 import styles from "./ReviewQueuePage.module.css";
 
 export function ReviewQueuePage() {
@@ -30,6 +31,12 @@ export function ReviewQueuePage() {
 
   useEffect(() => {
     load();
+  }, [load]);
+
+  useEffect(() => {
+    const onChange = () => load();
+    window.addEventListener(INVOICES_CHANGED, onChange);
+    return () => window.removeEventListener(INVOICES_CHANGED, onChange);
   }, [load]);
 
   return (

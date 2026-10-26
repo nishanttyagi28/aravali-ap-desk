@@ -50,9 +50,8 @@ jobs:
         run: |
           python -m evals.run --pred truth --truth "${{ steps.eval_dir.outputs.path }}" --report evals/out/report-smoke.json
           python -m evals.gate --report evals/out/report-smoke.json
-      - name: Extraction eval (report-only until M3)
+      - name: Extraction eval (blocking)
         id: extract_eval
-        continue-on-error: true
         env:
           TRUTH_DIR: ${{ steps.eval_dir.outputs.path }}
         run: |
@@ -78,14 +77,9 @@ jobs:
               print("NOTICE: docai.extract.extract_file not available; skipping real extraction eval.")
               sys.exit(0)
 
-          for truth_path in truth_dir.glob("*.truth.json"):
-              iid = truth_path.stem.removesuffix(".truth")
-              pdf = truth_dir / f"{iid}.pdf"
-              inv = extract_file(pdf)
-              (pred_dir / f"{iid}.json").write_text(
-                  json.dumps(inv.model_dump(mode="json"), indent=2) + "\n",
-                  encoding="utf-8",
-              )
+          from evals.offline_predict import predict_directory
+
+          predict_directory(truth_dir, pred_dir)
 
           import subprocess
           subprocess.check_call(
@@ -145,6 +139,69 @@ jobs:
         with:
           name: eval-report
           path: evals/out/*.json
+
+  ocr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install system libraries for OpenCV
+        run: sudo apt-get update && sudo apt-get install -y libgl1 libglib2.0-0
+      - name: Install package with OCR extras
+        run: pip install -e ".[dev,ocr]"
+      - name: Verify RapidOCR import
+        run: python -c "import rapidocr_onnxruntime"
+      - name: Pytest ingest and extract (OCR paths)
+        run: pytest -q tests/extract tests/ingest
+      - name: Prepare scanned eval dataset
+        id: scan_dir
+        run: |
+          mkdir -p "${{ runner.temp }}/aravali-ci-scan"
+          echo "path=${{ runner.temp }}/aravali-ci-scan" >> "$GITHUB_OUTPUT"
+      - name: Scanned extraction eval (report-only)
+        continue-on-error: true
+        env:
+          TRUTH_DIR: ${{ steps.scan_dir.outputs.path }}
+        run: |
+          python -m datasets.synth --n 50 --seed 7 --scanned-ratio 0.3 --out "${TRUTH_DIR}"
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          from docai.extract import extract_file
+
+          truth_dir = Path(os.environ["TRUTH_DIR"])
+          pred_dir = Path("evals/out/pred-scanned")
+          pred_dir.mkdir(parents=True, exist_ok=True)
+          for truth_path in truth_dir.glob("*.truth.json"):
+              iid = truth_path.stem.removesuffix(".truth")
+              pdf = truth_dir / f"{iid}.pdf"
+              inv = extract_file(pdf)
+              (pred_dir / f"{iid}.json").write_text(
+                  json.dumps(inv.model_dump(mode="json"), indent=2) + "\n",
+                  encoding="utf-8",
+              )
+          subprocess.check_call(
+              [
+                  sys.executable,
+                  "-m",
+                  "evals.run",
+                  "--pred",
+                  str(pred_dir),
+                  "--truth",
+                  str(truth_dir),
+                  "--report",
+                  "evals/out/report-scanned.json",
+              ]
+          )
+          print("Scanned eval report written to evals/out/report-scanned.json")
+          PY
 
   ui:
     runs-on: ubuntu-latest

@@ -20,3 +20,27 @@
   color: #fca5a5;
   font-size: 0.85rem;
 }
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.pageBtn,
+.pageActive {
+  min-width: 2rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  background: #1e293b;
+  color: #e2e8f0;
+  cursor: pointer;
+}
+
+.pageActive {
+  border-color: #38bdf8;
+  background: #0c4a6e;
+}

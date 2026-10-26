@@ -14,6 +14,7 @@ import { PdfViewer } from "../components/PdfViewer";
 import { PostToLedger } from "../components/PostToLedger";
 import { ReviewActions } from "../components/ReviewActions";
 import { useToast } from "../components/Toast/ToastContext";
+import { notifyInvoicesChanged } from "../lib/invoiceEvents";
 import { listExtractedFields } from "../utils/fields";
 import styles from "./InvoiceDetailPage.module.css";
 
@@ -26,25 +27,29 @@ export function InvoiceDetailPage() {
   const [ledger, setLedger] = useState<LedgerEntry | null>(null);
   const [posted, setPosted] = useState(false);
   const [highlighted, setHighlighted] = useState<string | null>(null);
+  const [pageNumber, setPageNumber] = useState(1);
   const [busy, setBusy] = useState(false);
   const { showError, showSuccess } = useToast();
 
-  const load = useCallback(() => {
+  const load = useCallback(async () => {
     if (!invoiceId) return;
-    api
-      .getInvoice(invoiceId)
-      .then((d) => {
-        setData(d);
-      })
-      .catch((e: unknown) => {
-        if (e instanceof ApiError) showError(e.message);
-      });
-    api
-      .getInvoiceFile(invoiceId)
-      .then(setPdf)
-      .catch((e: unknown) => {
-        if (e instanceof ApiError) showError(e.message);
-      });
+    try {
+      const d = await api.getInvoice(invoiceId);
+      setData(d);
+      const queue = await api.listReviewQueue();
+      const row = queue.find((q) => q.invoice_id === invoiceId);
+      if (row?.posted) {
+        setPosted(true);
+      }
+    } catch (e: unknown) {
+      if (e instanceof ApiError) showError(e.message);
+    }
+    try {
+      const blob = await api.getInvoiceFile(invoiceId);
+      setPdf(blob);
+    } catch (e: unknown) {
+      if (e instanceof ApiError) showError(e.message);
+    }
   }, [invoiceId, showError]);
 
   useEffect(() => {
@@ -77,6 +82,8 @@ export function InvoiceDetailPage() {
         corrections: corrections ?? null,
       });
       applyResult(result as InvoiceWithDecision);
+      notifyInvoicesChanged();
+      await load();
       showSuccess(`Review action "${action}" applied`);
     } catch (e) {
       if (e instanceof ApiError) showError(e.message);
@@ -92,6 +99,8 @@ export function InvoiceDetailPage() {
       const entry = await api.postInvoice(invoiceId);
       setLedger(entry);
       setPosted(true);
+      notifyInvoicesChanged();
+      await load();
       showSuccess("Posted to ledger");
     } catch (e) {
       if (e instanceof ApiError) showError(e.message);
@@ -122,7 +131,9 @@ export function InvoiceDetailPage() {
         <div className={styles.pdfCol}>
           <PdfViewer
             file={pdf}
-            pageNumber={1}
+            pageNumber={pageNumber}
+            pageCount={invoice.page_count ?? 1}
+            onPageChange={setPageNumber}
             fields={overlayFields}
             highlighted={highlighted}
             onHighlight={setHighlighted}

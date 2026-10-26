@@ -42,6 +42,8 @@ CONF_INFERRED = 0.55
 CONF_LOW = 0.25
 
 LINE_Y_TOLERANCE = 4.0
+# Classic synth layout omits a round-off row; infer from grand vs line totals when small.
+MAX_INFERRED_ROUND_OFF = Decimal("2.00")
 
 
 @dataclass
@@ -442,6 +444,13 @@ def extract_offline(document: Document, source_file: str) -> ExtractedInvoice:
     if grand == 0 and line_items:
         grand = sum((li.total for li in line_items), Decimal("0"))
 
+    sum_line_totals = sum((li.total for li in line_items), Decimal("0"))
+    round_off = Decimal("0")
+    if line_items and grand != 0:
+        delta = grand - sum_line_totals
+        if delta != 0 and abs(delta) <= MAX_INFERRED_ROUND_OFF:
+            round_off = delta
+
     scalar_values: dict[str, Any] = {
         "invoice_number": scalar("invoice_number"),
         "invoice_date": scalar("invoice_date"),
@@ -477,7 +486,7 @@ def extract_offline(document: Document, source_file: str) -> ExtractedInvoice:
         sgst_total=sgst if isinstance(sgst, Decimal) else Decimal(str(sgst)),
         igst_total=igst if isinstance(igst, Decimal) else Decimal(str(igst)),
         cess_total=Decimal("0"),
-        round_off=Decimal("0"),
+        round_off=round_off,
         grand_total=grand if isinstance(grand, Decimal) else Decimal(str(grand)),
         fields=fields,
         extractor_version=EXTRACTOR_VERSION,

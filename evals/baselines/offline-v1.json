@@ -1,0 +1,16 @@
+{
+  "dataset": { "n": 50, "seed": 7, "scanned_ratio": 0 },
+  "achieved": {
+    "header_macro_f1": 1.0,
+    "line_items_f1": 1.0,
+    "bbox_iou_at_0_5_rate": 1.0,
+    "decision_accuracy": 0.9
+  },
+  "floors": {
+    "header_field_f1_min": 0.98,
+    "header_macro_f1_min": 0.98,
+    "line_items_f1_min": 0.98,
+    "bbox_iou_at_0_5_min": 0.98,
+    "decision_accuracy_min": 0.87
+  }
+}

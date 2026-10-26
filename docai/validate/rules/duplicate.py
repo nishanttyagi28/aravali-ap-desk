@@ -10,10 +10,8 @@ def check_duplicate(
     inv: ExtractedInvoice,
     history: InvoiceHistory,
     *,
-    is_duplicate_case: bool,
+    is_duplicate_case: bool = True,
 ) -> list[ValidationIssue]:
-    if not is_duplicate_case:
-        return []
     if not inv.vendor_gstin or not inv.invoice_number or inv.invoice_date is None:
         return []
     norm = normalise_invoice_number(inv.invoice_number)

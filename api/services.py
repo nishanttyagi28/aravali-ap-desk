@@ -122,6 +122,7 @@ def apply_review(
             outcome = DecisionOutcome.REVIEW
         else:
             outcome = DecisionOutcome.ALLOW
+            row.human_approved = True
     else:
         outcome = decide(issues, inv).outcome
 

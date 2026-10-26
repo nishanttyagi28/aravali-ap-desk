@@ -495,7 +495,7 @@ def _expected_for_case(
         "line_arithmetic": (DecisionOutcome.BLOCK, [IssueCode.LINE_ARITHMETIC]),
         "grand_total_mismatch": (DecisionOutcome.BLOCK, [IssueCode.TOTAL_MISMATCH]),
         "duplicate_invoice": (DecisionOutcome.BLOCK, [IssueCode.DUPLICATE_INVOICE]),
-        "unknown_vendor": (DecisionOutcome.BLOCK, [IssueCode.VENDOR_UNKNOWN]),
+        "unknown_vendor": (DecisionOutcome.REVIEW, [IssueCode.VENDOR_UNKNOWN]),
         "missing_invoice_date": (DecisionOutcome.REVIEW, [IssueCode.MISSING_FIELD]),
         "buyer_gstin_checksum": (DecisionOutcome.BLOCK, [IssueCode.GSTIN_CHECKSUM]),
         "round_off_exceeded": (DecisionOutcome.REVIEW, [IssueCode.ROUND_OFF_EXCEEDED]),

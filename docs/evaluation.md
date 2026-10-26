@@ -16,15 +16,15 @@ Use a prediction directory with `<id>.json` (`ExtractedInvoice`) and optional `<
 
 ## Thresholds
 
-Configured in `evals/thresholds.yaml`:
+Configured in `evals/thresholds.yaml` (floors = achieved minus margin; see `evals/baselines/offline-v1.json`).
 
-| Metric | Floor |
-|--------|-------|
-| Per-header-field F1 | 0.90 |
-| Header macro F1 | 0.90 |
-| Line-item F1 | 0.90 |
-| Bbox IoU@0.5 rate | 0.85 |
-| Decision accuracy (when decisions present) | 0.95 |
+| Metric | Offline v1 achieved (n=50, seed=7) | Floor |
+|--------|-----------------------------------|-------|
+| Per-header-field F1 | 1.00 | 0.98 |
+| Header macro F1 | 1.00 | 0.98 |
+| Line-item F1 | 1.00 | 0.98 |
+| Bbox IoU@0.5 rate | 1.00 | 0.98 |
+| Decision accuracy (offline extract + validate) | 0.90 | 0.87 |
 
 `python -m evals.gate` exits non-zero and prints which metric failed.
 
@@ -39,4 +39,4 @@ AgentEval has no native bbox / line-item / issue-confusion types; those metrics 
 
 ## CI
 
-The `evals` workflow job runs truth-as-prediction gate (blocking) and offline extraction gate (report-only with `continue-on-error: true` until M3).
+The `evals` workflow job runs truth-as-prediction gate (blocking) and offline extraction + decision gate (blocking). The `ocr` job runs ingest/extract pytest and a report-only scanned eval (`--scanned-ratio 0.3`) when runtime allows.

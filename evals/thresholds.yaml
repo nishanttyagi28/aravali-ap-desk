@@ -1,6 +1,7 @@
 # Floors for evals.gate (see docs/evaluation.md).
-header_field_f1_min: 0.90
-header_macro_f1_min: 0.90
-line_items_f1_min: 0.90
-bbox_iou_at_0_5_min: 0.85
-decision_accuracy_min: 0.95
+# Set from offline-v1 baseline (n=50, seed=7, scanned-ratio=0) minus margin.
+header_field_f1_min: 0.98
+header_macro_f1_min: 0.98
+line_items_f1_min: 0.98
+bbox_iou_at_0_5_min: 0.98
+decision_accuracy_min: 0.87

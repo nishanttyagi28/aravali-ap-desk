@@ -28,8 +28,8 @@ Synth v1 scanned PDFs apply a mild page rotation; truth `bboxes` are updated wit
 | Outcome | Issue codes (representative) |
 |---------|----------------------------|
 | **ALLOW** | (none) |
-| **BLOCK** | `GSTIN_CHECKSUM`, `GSTIN_STATE_MISMATCH`, `TAX_REGIME_MISMATCH`, `DUPLICATE_INVOICE`, `LINE_ARITHMETIC`, `TOTAL_MISMATCH`, `VENDOR_UNKNOWN` |
-| **REVIEW** | `ROUND_OFF_EXCEEDED`, `LOW_CONFIDENCE`, `MISSING_FIELD` |
+| **BLOCK** | `GSTIN_CHECKSUM`, `GSTIN_STATE_MISMATCH`, `TAX_REGIME_MISMATCH`, `DUPLICATE_INVOICE`, `LINE_ARITHMETIC`, `TOTAL_MISMATCH` |
+| **REVIEW** | `VENDOR_UNKNOWN`, `ROUND_OFF_EXCEEDED`, `LOW_CONFIDENCE`, `MISSING_FIELD` |
 
 Policy implementation: `docai/validate/policy.py` (`BLOCK_CODES`, `REVIEW_CODES`, `outcome_from_issues`).
 

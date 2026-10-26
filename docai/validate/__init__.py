@@ -44,14 +44,13 @@ def validate(
     *,
     duplicate_of: UUID | None = None,
 ) -> list[ValidationIssue]:
-    is_dup = duplicate_of is not None
     issues: list[ValidationIssue] = []
     issues.extend(rules.check_missing_fields(inv))
     issues.extend(rules.check_gstin_checksum(inv))
     issues.extend(rules.check_gstin_state(inv, vendors))
     issues.extend(rules.check_vendor(inv, vendors))
     vendor_unknown = any(issue.code == IssueCode.VENDOR_UNKNOWN for issue in issues)
-    issues.extend(rules.check_duplicate(inv, history, is_duplicate_case=is_dup))
+    issues.extend(rules.check_duplicate(inv, history))
     line_issues = rules.check_line_arithmetic(inv)
     issues.extend(line_issues)
     has_line_arith = any(issue.code == IssueCode.LINE_ARITHMETIC for issue in line_issues)
@@ -61,8 +60,7 @@ def validate(
         issues.extend(total_issues)
     has_total_mismatch = any(issue.code == IssueCode.TOTAL_MISMATCH for issue in total_issues)
     if (
-        not is_dup
-        and not vendor_unknown
+        not vendor_unknown
         and inv.invoice_date is not None
         and not has_line_arith
         and not has_total_mismatch

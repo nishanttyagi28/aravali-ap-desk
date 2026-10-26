@@ -12,6 +12,8 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 interface Props {
   file: Blob | null;
   pageNumber: number;
+  pageCount: number;
+  onPageChange: (page: number) => void;
   fields: OverlayField[];
   highlighted: string | null;
   onHighlight: (name: string | null) => void;
@@ -20,6 +22,8 @@ interface Props {
 export function PdfViewer({
   file,
   pageNumber,
+  pageCount,
+  onPageChange,
   fields,
   highlighted,
   onHighlight,
@@ -76,9 +80,26 @@ export function PdfViewer({
   }, [file, pageNumber]);
 
   const pageFields = fields.filter((f) => f.bbox.page === pageNumber);
+  const pages = Math.max(1, pageCount);
 
   return (
     <div ref={wrapRef} className={styles.wrap}>
+      {pages > 1 && (
+        <nav className={styles.pager} aria-label="PDF pages">
+          {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              type="button"
+              className={p === pageNumber ? styles.pageActive : styles.pageBtn}
+              aria-label={`Page ${p}`}
+              aria-current={p === pageNumber ? "page" : undefined}
+              onClick={() => onPageChange(p)}
+            >
+              {p}
+            </button>
+          ))}
+        </nav>
+      )}
       {error && <p className={styles.error} role="alert">{error}</p>}
       <div className={styles.canvasWrap}>
         <canvas ref={canvasRef} className={styles.canvas} />
