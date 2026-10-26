@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from collections.abc import Callable
 from pathlib import Path
 from typing import Annotated
@@ -15,6 +16,15 @@ from db.session import create_db_engine, init_db, session_factory
 UPLOAD_DIR = Path("data/uploads")
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 PDF_MAGIC = b"%PDF"
+
+_DEFAULT_CORS_ORIGINS = ("http://localhost:5173", "http://127.0.0.1:5173")
+
+
+def cors_origins() -> list[str]:
+    raw = os.environ.get("CORS_ORIGINS")
+    if raw is None:
+        return list(_DEFAULT_CORS_ORIGINS)
+    return [origin.strip() for origin in raw.split(",") if origin.strip()]
 
 
 class AppState:

@@ -42,4 +42,15 @@ def check_missing_fields(inv: ExtractedInvoice) -> list[ValidationIssue]:
                 message="At least one line item is required",
             )
         )
+    else:
+        for index, line in enumerate(inv.line_items):
+            if not line.hsn_sac:
+                issues.append(
+                    ValidationIssue(
+                        code=IssueCode.MISSING_FIELD,
+                        severity=IssueSeverity.WARN,
+                        field=f"line_items[{index}].hsn_sac",
+                        message="HSN/SAC is required for each line item",
+                    )
+                )
     return issues

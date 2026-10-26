@@ -8,6 +8,7 @@ from uuid import UUID
 
 from fastapi import Depends, FastAPI, File, HTTPException, Query, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -18,6 +19,7 @@ from api.deps import (
     UPLOAD_DIR,
     AppState,
     build_state,
+    cors_origins,
     get_db,
     get_state,
 )
@@ -50,6 +52,13 @@ def _default_extractor(path: Path):
 
 def create_app(state: AppState | None = None) -> FastAPI:
     app = FastAPI(title="Aravali AP Desk API", version="0.1.0")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=cors_origins(),
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     app.state.app_state = state or build_state()
 
     @app.exception_handler(StarletteHTTPException)
