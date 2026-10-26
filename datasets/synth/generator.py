@@ -18,6 +18,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 
+from datasets.synth.types import LayoutBox
 from docai.contracts.bbox import BBox
 from docai.contracts.decision import DecisionOutcome
 from docai.contracts.extracted import (
@@ -33,7 +34,22 @@ from docai.contracts.validation import IssueCode
 from docai.contracts.vendor import Vendor, VendorMaster
 
 GENERATOR_VERSION = "synth-v0"
+GENERATOR_VERSION_V1 = "synth-v1"
 TWO = Decimal("0.01")
+
+
+@dataclass
+class SynthOptions:
+    """v1 features are active only when any non-default field is set."""
+
+    template: str | None = None  # classic | compact (None = v0 layout)
+    scanned_ratio: float = 0.0
+    multipage: bool = False
+
+    @property
+    def is_v1(self) -> bool:
+        return self.template is not None or self.scanned_ratio > 0 or self.multipage
+
 
 BROKEN_CASES = [
     "bad_gstin_checksum",
@@ -45,19 +61,12 @@ BROKEN_CASES = [
     "unknown_vendor",
     "missing_invoice_date",
 ]
+BROKEN_CASES_V1 = [
+    "buyer_gstin_checksum",
+    "round_off_exceeded",
+    "hsn_missing",
+]
 CLEAN_CASES = ["clean_intrastate", "clean_interstate"]
-
-
-@dataclass
-class LayoutBox:
-    page: int
-    x0: float
-    y0: float
-    x1: float
-    y1: float
-
-    def to_bbox(self) -> BBox:
-        return BBox(page=self.page, x0=self.x0, y0=self.y0, x1=self.x1, y1=self.y1)
 
 
 def _q(amount: Decimal) -> Decimal:
@@ -99,17 +108,26 @@ def _field(
     )
 
 
-def _assign_cases(n: int, seed: int) -> list[str]:
+def _broken_pool(options: SynthOptions) -> list[str]:
+    pool = list(BROKEN_CASES)
+    if options.is_v1:
+        pool.extend(BROKEN_CASES_V1)
+    return pool
+
+
+def _assign_cases(n: int, seed: int, *, options: SynthOptions | None = None) -> list[str]:
+    opts = options or SynthOptions()
+    broken_pool = _broken_pool(opts)
     rng = random.Random(seed)
     clean_target = int(round(0.7 * n))
     broken_count = n - clean_target
     cases: list[str] = []
-    if n >= len(BROKEN_CASES):
-        cases.extend(BROKEN_CASES)
-        for _ in range(broken_count - len(BROKEN_CASES)):
-            cases.append(rng.choice(BROKEN_CASES))
+    if n >= len(broken_pool):
+        cases.extend(broken_pool)
+        for _ in range(broken_count - len(broken_pool)):
+            cases.append(rng.choice(broken_pool))
     else:
-        cases.extend(rng.sample(BROKEN_CASES, k=broken_count))
+        cases.extend(rng.sample(broken_pool, k=broken_count))
     for _ in range(clean_target):
         cases.append(rng.choice(CLEAN_CASES))
     rng.shuffle(cases)
@@ -144,12 +162,18 @@ def _buyer_gstin(rng: random.Random) -> tuple[str, str]:
 
 
 def _line_items(
-    rng: random.Random, interstate: bool, *, break_arithmetic: bool = False
+    rng: random.Random,
+    interstate: bool,
+    *,
+    break_arithmetic: bool = False,
+    line_count: int | None = None,
+    hsn_missing_index: int | None = None,
 ) -> tuple[list[LineItem], list[dict[str, Any]]]:
     rates = [Decimal("5"), Decimal("12"), Decimal("18")]
     items: list[LineItem] = []
     rows: list[dict[str, Any]] = []
-    for idx in range(rng.randint(1, 3)):
+    count = line_count if line_count is not None else rng.randint(1, 3)
+    for idx in range(count):
         rate = rng.choice(rates)
         qty = Decimal(str(rng.randint(1, 10)))
         unit = Decimal(str(rng.choice([100, 250, 499.5])))
@@ -166,6 +190,8 @@ def _line_items(
             total += Decimal("1.00")
         desc = f"Item {idx + 1} — Industrial goods"
         hsn = f"{rng.randint(1000, 9999)}"
+        if hsn_missing_index is not None and idx == hsn_missing_index:
+            hsn = None
         items.append(
             LineItem(
                 description=desc,
@@ -184,7 +210,7 @@ def _line_items(
         rows.append(
             {
                 "description": desc,
-                "hsn": hsn,
+                "hsn": hsn or "",
                 "qty": str(qty),
                 "rate": _money_str(unit),
                 "taxable": _money_str(taxable),
@@ -314,7 +340,152 @@ def _draw_invoice_pdf(
     return boxes
 
 
-def _expected_for_case(case: str) -> tuple[DecisionOutcome, list[IssueCode]]:
+def _draw_invoice_pdf_compact(
+    path: Path,
+    *,
+    seller: Vendor,
+    buyer_gstin: str,
+    buyer_state: str,
+    invoice_number: str,
+    invoice_date: date | None,
+    place_of_supply: str,
+    rows: list[dict[str, Any]],
+    totals: dict[str, Decimal],
+    interstate: bool,
+) -> dict[str, LayoutBox]:
+    """Thermal-style narrow layout (v1)."""
+    width, height = A4
+    c = canvas.Canvas(str(path), pagesize=A4, invariant=1)
+    boxes: dict[str, LayoutBox] = {}
+    page = 1
+    margin = 12 * mm
+    y = height - 18 * mm
+
+    def draw_kv(key: str, label: str, value: str, y_pos: float) -> float:
+        c.setFont("Helvetica-Bold", 7)
+        c.drawString(margin, y_pos, label)
+        c.setFont("Helvetica", 8)
+        c.drawString(margin + 28 * mm, y_pos, value)
+        w = c.stringWidth(value, "Helvetica", 8)
+        boxes[key] = LayoutBox(page, margin + 28 * mm, y_pos - 2, margin + 28 * mm + w, y_pos + 8)
+        return y_pos - 5 * mm
+
+    c.setFont("Helvetica-Bold", 11)
+    c.drawCentredString(width / 2, y, "TAX INVOICE")
+    y -= 8 * mm
+    y = draw_kv("vendor_gstin", "Seller:", seller.gstin, y)
+    c.setFont("Helvetica", 8)
+    c.drawString(margin, y, seller.legal_name[:36])
+    y -= 6 * mm
+    y = draw_kv("buyer_gstin", "Buyer:", buyer_gstin, y)
+    y = draw_kv("place_of_supply_state_code", "POS:", place_of_supply, y)
+    y = draw_kv("invoice_number", "Inv#:", invoice_number, y)
+    if invoice_date:
+        y = draw_kv("invoice_date", "Date:", invoice_date.isoformat(), y)
+    y -= 3 * mm
+    c.setFont("Helvetica-Bold", 7)
+    for i, h in enumerate(["Desc", "HSN", "Amt"]):
+        c.drawString(margin + i * 32 * mm, y, h)
+    y -= 4 * mm
+    c.setFont("Helvetica", 7)
+    for row in rows:
+        c.drawString(margin, y, row["description"][:18])
+        c.drawString(margin + 32 * mm, y, row["hsn"][:6])
+        c.drawString(margin + 64 * mm, y, row["total"])
+        y -= 4 * mm
+    y -= 2 * mm
+    y = draw_kv("taxable_total", "Taxable:", _money_str(totals["taxable_total"]), y)
+    if interstate:
+        y = draw_kv("igst_total", "IGST:", _money_str(totals["igst_total"]), y)
+    else:
+        y = draw_kv("cgst_total", "CGST:", _money_str(totals["cgst_total"]), y)
+        y = draw_kv("sgst_total", "SGST:", _money_str(totals["sgst_total"]), y)
+    y = draw_kv("grand_total", "Total:", _money_str(totals["grand_total"]), y)
+    c.showPage()
+    c.save()
+    return boxes
+
+
+def _draw_invoice_pdf_multipage(
+    path: Path,
+    *,
+    seller: Vendor,
+    buyer_gstin: str,
+    buyer_state: str,
+    invoice_number: str,
+    invoice_date: date | None,
+    place_of_supply: str,
+    rows: list[dict[str, Any]],
+    totals: dict[str, Decimal],
+    interstate: bool,
+) -> dict[str, LayoutBox]:
+    width, height = A4
+    c = canvas.Canvas(str(path), pagesize=A4, invariant=1)
+    boxes: dict[str, LayoutBox] = {}
+    page = 1
+    y = height - 25 * mm
+
+    def draw_label_value(key: str, label: str, value: str, x: float, y_pos: float) -> float:
+        c.setFont("Helvetica-Bold", 9)
+        c.drawString(x, y_pos, label)
+        c.setFont("Helvetica", 10)
+        c.drawString(x + 35 * mm, y_pos, value)
+        w = c.stringWidth(value, "Helvetica", 10)
+        boxes[key] = LayoutBox(page, x + 35 * mm, y_pos - 2, x + 35 * mm + w, y_pos + 10)
+        return y_pos - 6 * mm
+
+    c.setFont("Helvetica-Bold", 14)
+    c.drawCentredString(width / 2, y, "TAX INVOICE")
+    y -= 10 * mm
+    y = draw_label_value("vendor_gstin", "Seller GSTIN:", seller.gstin, 20 * mm, y)
+    y = draw_label_value("buyer_gstin", "Buyer GSTIN:", buyer_gstin, 20 * mm, y)
+    y = draw_label_value("invoice_number", "Invoice No:", invoice_number, 20 * mm, y)
+    if invoice_date:
+        y = draw_label_value("invoice_date", "Invoice Date:", invoice_date.isoformat(), 20 * mm, y)
+    y -= 6 * mm
+    c.setFont("Helvetica-Bold", 9)
+    c.drawString(20 * mm, y, "Description")
+    c.drawString(120 * mm, y, "Total")
+    y -= 5 * mm
+    c.setFont("Helvetica", 9)
+    line_bottom = 45 * mm
+    for row in rows:
+        if y < line_bottom:
+            c.showPage()
+            page += 1
+            y = height - 25 * mm
+            c.setFont("Helvetica-Bold", 9)
+            c.drawString(20 * mm, y, "Description (cont.)")
+            y -= 6 * mm
+            c.setFont("Helvetica", 9)
+        c.drawString(20 * mm, y, row["description"][:40])
+        c.drawString(120 * mm, y, row["total"])
+        y -= 5 * mm
+    c.showPage()
+    page += 1
+    y = height - 40 * mm
+    y = draw_label_value(
+        "grand_total", "Grand Total:", _money_str(totals["grand_total"]), 20 * mm, y
+    )
+    boxes["place_of_supply_state_code"] = LayoutBox(page, 20 * mm, y - 20, 80 * mm, y + 8)
+    boxes["taxable_total"] = LayoutBox(page, 120 * mm, y - 20, 180 * mm, y + 8)
+    if interstate:
+        boxes["igst_total"] = LayoutBox(page, 120 * mm, y - 35, 180 * mm, y - 5)
+    else:
+        boxes["cgst_total"] = LayoutBox(page, 120 * mm, y - 35, 180 * mm, y - 5)
+        boxes["sgst_total"] = LayoutBox(page, 120 * mm, y - 50, 180 * mm, y - 20)
+    c.showPage()
+    c.save()
+    return boxes
+
+
+def _page_count_for_layout(layout: dict[str, LayoutBox]) -> int:
+    return max((box.page for box in layout.values()), default=1)
+
+
+def _expected_for_case(
+    case: str, *, hsn_missing_index: int | None = None
+) -> tuple[DecisionOutcome, list[IssueCode]]:
     mapping: dict[str, tuple[DecisionOutcome, list[IssueCode]]] = {
         "clean_intrastate": (DecisionOutcome.ALLOW, []),
         "clean_interstate": (DecisionOutcome.ALLOW, []),
@@ -326,8 +497,14 @@ def _expected_for_case(case: str) -> tuple[DecisionOutcome, list[IssueCode]]:
         "duplicate_invoice": (DecisionOutcome.BLOCK, [IssueCode.DUPLICATE_INVOICE]),
         "unknown_vendor": (DecisionOutcome.BLOCK, [IssueCode.VENDOR_UNKNOWN]),
         "missing_invoice_date": (DecisionOutcome.REVIEW, [IssueCode.MISSING_FIELD]),
+        "buyer_gstin_checksum": (DecisionOutcome.BLOCK, [IssueCode.GSTIN_CHECKSUM]),
+        "round_off_exceeded": (DecisionOutcome.REVIEW, [IssueCode.ROUND_OFF_EXCEEDED]),
+        "hsn_missing": (DecisionOutcome.REVIEW, [IssueCode.MISSING_FIELD]),
     }
-    return mapping[case]
+    outcome, codes = mapping[case]
+    if case == "hsn_missing" and hsn_missing_index is not None:
+        return outcome, list(codes)
+    return outcome, codes
 
 
 def _build_truth(
@@ -346,6 +523,8 @@ def _build_truth(
     source_file: str,
     pdf_bytes: bytes,
     duplicate_of: uuid.UUID | None,
+    page_count: int = 1,
+    generator_version: str = GENERATOR_VERSION,
 ) -> TruthRecord:
     bboxes = {k: v.to_bbox() for k, v in layout.items()}
     fields: dict[str, ExtractedField] = {}
@@ -377,11 +556,12 @@ def _build_truth(
         raw = invoice_date.isoformat() if key == "invoice_date" and invoice_date else str(val)
         fields[key] = _field(key, val, raw, bboxes.get(key))
 
+    outcome, codes = _expected_for_case(case)
     invoice = ExtractedInvoice(
         invoice_id=invoice_id,
         source_file=source_file,
         sha256=hashlib.sha256(pdf_bytes).hexdigest(),
-        page_count=1,
+        page_count=page_count,
         invoice_number=invoice_number,
         invoice_date=invoice_date,
         vendor_gstin=seller.gstin,
@@ -397,10 +577,9 @@ def _build_truth(
         round_off=totals["round_off"],
         grand_total=totals["grand_total"],
         fields=fields,
-        extractor_version=GENERATOR_VERSION,
+        extractor_version=generator_version,
         mode=ExtractionMode.OFFLINE,
     )
-    outcome, codes = _expected_for_case(case)
     return TruthRecord(
         invoice=invoice,
         expected_decision=outcome,
@@ -416,12 +595,15 @@ def generate_dataset(
     out_dir: Path,
     *,
     cases_override: list[str] | None = None,
+    options: SynthOptions | None = None,
 ) -> dict[str, Any]:
     out_dir.mkdir(parents=True, exist_ok=True)
+    opts = options or SynthOptions()
+    gen_version = GENERATOR_VERSION_V1 if opts.is_v1 else GENERATOR_VERSION
     rng = random.Random(seed)
     vendors = _vendor_pool(rng)
     master_vendors = list(vendors)
-    cases = cases_override if cases_override is not None else _assign_cases(n, seed)
+    cases = cases_override if cases_override is not None else _assign_cases(n, seed, options=opts)
     if len(cases) != n:
         raise ValueError("cases_override length must equal n")
     case_counts: dict[str, int] = {}
@@ -487,28 +669,62 @@ def generate_dataset(
                 state_code="32",
                 pan=pan,
             )
+        if case == "buyer_gstin_checksum":
+            st = buyer_state
+            pan = _make_pan(rng)
+            buyer_gstin = _make_gstin(st, pan, rng, bad_checksum=True)
         break_arith = case == "line_arithmetic"
-        items, rows = _line_items(rng, interstate, break_arithmetic=break_arith)
+        hsn_missing_index = 0 if case == "hsn_missing" else None
+        line_count = 30 if opts.multipage else None
+        items, rows = _line_items(
+            rng,
+            interstate,
+            break_arithmetic=break_arith,
+            line_count=line_count,
+            hsn_missing_index=hsn_missing_index,
+        )
         totals = _totals(items)
         if case == "grand_total_mismatch":
             totals["grand_total"] = totals["grand_total"] + Decimal("10.00")
+        if case == "round_off_exceeded":
+            totals["round_off"] = Decimal("1.50")
+            totals["grand_total"] = _q(totals["grand_total"] + totals["round_off"])
         if case == "missing_invoice_date":
             inv_date = None
 
         pdf_name = f"{invoice_id}.pdf"
         pdf_path = out_dir / pdf_name
-        layout = _draw_invoice_pdf(
-            pdf_path,
-            seller=seller,
-            buyer_gstin=buyer_gstin,
-            buyer_state=buyer_state,
-            invoice_number=inv_no,
-            invoice_date=inv_date,
-            place_of_supply=buyer_state,
-            rows=rows,
-            totals=totals,
-            interstate=interstate,
-        )
+        draw_kwargs = {
+            "seller": seller,
+            "buyer_gstin": buyer_gstin,
+            "buyer_state": buyer_state,
+            "invoice_number": inv_no,
+            "invoice_date": inv_date,
+            "place_of_supply": buyer_state,
+            "rows": rows,
+            "totals": totals,
+            "interstate": interstate,
+        }
+        if opts.multipage:
+            layout = _draw_invoice_pdf_multipage(pdf_path, **draw_kwargs)
+            from pypdf import PdfReader
+
+            page_count = len(PdfReader(str(pdf_path)).pages)
+        elif opts.template == "compact":
+            layout = _draw_invoice_pdf_compact(pdf_path, **draw_kwargs)
+            page_count = _page_count_for_layout(layout)
+        else:
+            layout = _draw_invoice_pdf(pdf_path, **draw_kwargs)
+            page_count = _page_count_for_layout(layout)
+
+        if opts.scanned_ratio > 0 and rng.random() < opts.scanned_ratio:
+            from datasets.synth.scanned import rasterize_to_scanned_pdf, transform_layout_boxes
+
+            width, height = A4
+            angle_deg, _dpi = rasterize_to_scanned_pdf(pdf_path, pdf_path, rng)
+            layout = transform_layout_boxes(layout, width, height, angle_deg)
+            page_count = 1
+
         pdf_bytes = pdf_path.read_bytes()
         truth = _build_truth(
             invoice_id=invoice_id,
@@ -525,6 +741,8 @@ def generate_dataset(
             source_file=pdf_name,
             pdf_bytes=pdf_bytes,
             duplicate_of=duplicate_of,
+            page_count=page_count,
+            generator_version=gen_version,
         )
         truth_path = out_dir / f"{invoice_id}.truth.json"
         truth_path.write_text(
@@ -551,7 +769,7 @@ def generate_dataset(
         {k: v for k, v in row.items() if not k.startswith("_")} for row in manifest_invoices
     ]
     manifest = {
-        "generator_version": GENERATOR_VERSION,
+        "generator_version": gen_version,
         "seed": seed,
         "count": n,
         "case_counts": case_counts,

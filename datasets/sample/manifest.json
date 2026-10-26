@@ -1,13 +1,16 @@
 {
   "case_counts": {
     "bad_gstin_checksum": 1,
+    "buyer_gstin_checksum": 1,
     "clean_interstate": 1,
     "clean_intrastate": 2,
     "duplicate_invoice": 1,
-    "line_arithmetic": 1
+    "hsn_missing": 1,
+    "line_arithmetic": 1,
+    "round_off_exceeded": 1
   },
-  "count": 6,
-  "generator_version": "synth-v0",
+  "count": 9,
+  "generator_version": "synth-v1",
   "invoices": [
     {
       "case": "clean_intrastate",
@@ -38,6 +41,21 @@
       "case": "line_arithmetic",
       "duplicate_of": null,
       "id": "662b78f5-6081-62c3-3760-e39956622305"
+    },
+    {
+      "case": "buyer_gstin_checksum",
+      "duplicate_of": null,
+      "id": "27cd8130-4722-9389-571a-a8766c307511"
+    },
+    {
+      "case": "round_off_exceeded",
+      "duplicate_of": null,
+      "id": "11ce5dd2-b45e-d1f0-3139-d32c93cd59bf"
+    },
+    {
+      "case": "hsn_missing",
+      "duplicate_of": null,
+      "id": "451b4cf3-6123-fdf7-7656-af7229d4beef"
     }
   ],
   "seed": 99
