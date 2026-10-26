@@ -1,0 +1,35 @@
+.region {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: min(24rem, 90vw);
+}
+
+.toast {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.error {
+  background: #3b1212;
+  color: #fecaca;
+  border: 1px solid #991b1b;
+}
+
+.success {
+  background: #14532d;
+  color: #bbf7d0;
+  border: 1px solid #166534;
+}
+
+.info {
+  background: #1e3a5f;
+  color: #bfdbfe;
+  border: 1px solid #1d4ed8;
+}

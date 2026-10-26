@@ -1,0 +1,11 @@
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 2rem;
+}
+
+.header h1 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}

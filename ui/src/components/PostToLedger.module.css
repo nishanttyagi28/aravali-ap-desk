@@ -1,0 +1,48 @@
+.panel h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.panel button {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #166534;
+  color: #dcfce7;
+  cursor: pointer;
+}
+
+.panel button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: var(--surface-elevated);
+  color: inherit;
+}
+
+.panel button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0.5rem 0 0;
+}
+
+.meta {
+  margin: 1rem 0 0;
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.meta dt {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.meta dd {
+  margin: 0;
+  font-family: ui-monospace, monospace;
+}

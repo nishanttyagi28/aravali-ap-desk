@@ -1,0 +1,62 @@
+.page {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 2rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  flex: 1;
+}
+
+.header a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+.header a:hover {
+  text-decoration: underline;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pdfCol {
+  min-width: 0;
+  background: var(--surface-elevated);
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.sideCol {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;
+}
+
+.loading {
+  padding: 2rem;
+  color: var(--text-muted);
+}
