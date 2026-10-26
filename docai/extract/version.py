@@ -1,0 +1,1 @@
+EXTRACTOR_VERSION = "extract-v1"
