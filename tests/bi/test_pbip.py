@@ -1,6 +1,6 @@
 import json
 import re
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 from bi.export import (
     EVAL_COLUMNS,
@@ -12,7 +12,7 @@ from bi.export import (
 )
 
 PBIP_ROOT = Path(__file__).resolve().parents[2] / "bi" / "powerbi"
-DATA_FOLDER_PATH = Path(r"E:\aravali-ap-desk\bi\data")
+DATA_FOLDER_PATH = PureWindowsPath(r"E:\aravali-ap-desk\bi\data")
 
 TABLE_CSV_COLUMNS: dict[str, list[str]] = {
     "Invoices": INVOICE_COLUMNS,
@@ -114,7 +114,7 @@ def test_datafolder_absolute_and_partitions_use_csv_quote_style() -> None:
     folder = match.group(1)
     assert re.match(r"^[A-Za-z]:\\", folder), "DataFolder must be an absolute Windows path"
     assert folder.endswith("\\"), "DataFolder must end with a backslash"
-    assert Path(folder) == DATA_FOLDER_PATH
+    assert PureWindowsPath(folder.rstrip("\\")) == DATA_FOLDER_PATH
 
     tables_dir = PBIP_ROOT / "AravaliAP.SemanticModel" / "definition" / "tables"
     for path in tables_dir.glob("*.tmdl"):

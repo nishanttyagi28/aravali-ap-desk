@@ -24,6 +24,7 @@ MIS_SHEETS = (
 
 INR_FORMAT = "#,##,##0.00"
 _INT_FORMAT = "#,##,##0"
+_MACRO_F1_FORMAT = "0.0%"
 _HEADER_FONT = Font(bold=True)
 
 
@@ -75,10 +76,12 @@ def _write_summary(
         if (row.get("posted") or "").lower() == "true":
             posted_amount += gt
 
-    macro_f1 = ""
+    macro_f1: float | None = None
     for row in eval_rows:
         if row.get("metric") == "header_macro_f1":
-            macro_f1 = row.get("value") or ""
+            raw = (row.get("value") or "").strip()
+            if raw:
+                macro_f1 = float(raw)
             break
 
     header = ["Metric", "Value"]
@@ -98,6 +101,9 @@ def _write_summary(
         elif isinstance(value, int):
             ws.append([metric, value])
             ws.cell(row=ws.max_row, column=2).number_format = _INT_FORMAT
+        elif isinstance(value, float):
+            ws.append([metric, value])
+            ws.cell(row=ws.max_row, column=2).number_format = _MACRO_F1_FORMAT
         else:
             ws.append([metric, value])
 

@@ -45,7 +45,9 @@ def test_mis_workbook_against_committed_csvs(tmp_path: Path) -> None:
     assert summary_map["Invoice count (REVIEW)"] == review
     assert summary_map["Invoice count (BLOCK)"] == block
     assert Decimal(str(summary_map["Posted amount"])) == posted
-    assert str(summary_map["Extraction macro F1"]) == macro
+    macro_cell = summary_map["Extraction macro F1"]
+    assert isinstance(macro_cell, (int, float))
+    assert float(macro_cell) == float(macro)
 
     unposted = [r for r in invoices if r.get("posted") != "true"]
     buckets: dict[str, int] = defaultdict(int)
