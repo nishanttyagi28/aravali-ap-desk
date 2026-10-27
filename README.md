@@ -10,6 +10,8 @@ Indian GST vendor invoices arrive as scanned PDFs and email attachments. AP team
 
 ![Review UI demo](docs/demo/aravali-demo.gif)
 
+**Code walkthrough (silent, for voice-over, ~42 min in 5 parts):** [docs/demo/walkthrough/](docs/demo/walkthrough/) - VS Code opens every source/config file in project-tour order; [walkthrough-index.md](docs/demo/walkthrough/walkthrough-index.md) maps each timestamp to its file and purpose.
+
 ## What it does
 
 | Stage | Output |
