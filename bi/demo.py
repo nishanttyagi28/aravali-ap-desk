@@ -6,6 +6,7 @@ import argparse
 import json
 import shutil
 import tempfile
+from datetime import date
 from pathlib import Path
 
 from sqlalchemy.orm import Session
@@ -78,8 +79,9 @@ def main(argv: list[str] | None = None) -> int:
         with factory() as session:
             report_path = _run_pipeline(session, synth_dir, receipts_dir)
 
-        export_marts(Session(engine), out_dir, report_path)
-        build_mis_workbook(out_dir, out_dir / "mis.xlsx")
+        demo_run_id = f"synth-n{args.n}-seed{args.seed}"
+        export_marts(Session(engine), out_dir, report_path, run_id=demo_run_id)
+        build_mis_workbook(out_dir, out_dir / "mis.xlsx", as_of=date(2026, 10, 26))
 
     print(f"Demo DB: {db_path}")
     print(f"CSV marts: {out_dir}")

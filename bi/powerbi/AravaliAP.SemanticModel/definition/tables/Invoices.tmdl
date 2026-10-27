@@ -1,0 +1,147 @@
+table Invoices
+	lineageTag: a1000001-0000-4000-8000-000000000001
+
+	measure 'Invoice Count' = COUNTROWS(Invoices)
+		formatString: #,##0
+
+	measure 'Invoices ALLOW' = CALCULATE([Invoice Count], Invoices[decision] = "ALLOW")
+		formatString: #,##0
+
+	measure 'Invoices REVIEW' = CALCULATE([Invoice Count], Invoices[decision] = "REVIEW")
+		formatString: #,##0
+
+	measure 'Invoices BLOCK' = CALCULATE([Invoice Count], Invoices[decision] = "BLOCK")
+		formatString: #,##0
+
+	measure 'Pct Auto Allowed' = DIVIDE([Invoices ALLOW], [Invoice Count], 0)
+		formatString: 0.00%
+
+	measure 'Taxable Value Total' = SUM(Invoices[taxable_total])
+		formatString: "₹"#,##0
+
+	measure 'Posted Grand Total' = CALCULATE(SUM(Invoices[grand_total]), Invoices[posted] = "true")
+		formatString: "₹"#,##0
+
+	measure 'Unposted Grand Total' = CALCULATE(SUM(Invoices[grand_total]), Invoices[posted] = "false")
+		formatString: "₹"#,##0
+
+	measure 'Vendor Exposure' = SUM(Invoices[grand_total])
+		formatString: "₹"#,##0
+
+	measure 'Grand Total' = SUM(Invoices[grand_total])
+		formatString: "₹"#,##0
+
+	measure 'Unposted Amount' = [Unposted Grand Total]
+		formatString: "₹"#,##0
+
+	column invoice_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: invoice_id
+
+	column vendor_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: vendor_id
+
+	column vendor_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: vendor_name
+
+	column vendor_gstin
+		dataType: string
+		summarizeBy: none
+		sourceColumn: vendor_gstin
+
+	column invoice_number
+		dataType: string
+		summarizeBy: none
+		sourceColumn: invoice_number
+
+	column invoice_date
+		dataType: dateTime
+		summarizeBy: none
+		sourceColumn: invoice_date
+
+	column taxable_total
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: taxable_total
+
+	column cgst_total
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: cgst_total
+
+	column sgst_total
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: sgst_total
+
+	column igst_total
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: igst_total
+
+	column cess_total
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: cess_total
+
+	column grand_total
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: grand_total
+
+	column decision
+		dataType: string
+		summarizeBy: none
+		sourceColumn: decision
+
+	column top_issue_code
+		dataType: string
+		summarizeBy: none
+		sourceColumn: top_issue_code
+
+	column issue_count
+		dataType: int64
+		summarizeBy: sum
+		sourceColumn: issue_count
+
+	column posted
+		dataType: string
+		summarizeBy: none
+		sourceColumn: posted
+
+	column posted_at
+		dataType: string
+		summarizeBy: none
+		sourceColumn: posted_at
+
+	column 'Posting Status'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Posting Status
+
+	partition Invoices = m
+		mode: import
+		source =
+			let
+			    Source = Csv.Document(File.Contents(DataFolder & "invoices.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+			    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+			    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers", {{"invoice_id", type text}, {"taxable_total", type number}, {"cgst_total", type number}, {"sgst_total", type number}, {"igst_total", type number}, {"cess_total", type number}, {"grand_total", type number}, {"issue_count", Int64.Type}, {"invoice_date", type date}}, "en-US"),
+			    #"Added Posting Status" = Table.AddColumn(
+			        #"Changed Type",
+			        "Posting Status",
+			        each
+			            if Text.Lower(Text.From([posted])) = "true" then
+			                "Posted"
+			            else if Text.Lower(Text.From([posted])) = "false" then
+			                "Unposted"
+			            else
+			                null,
+			        type text
+			    )
+			in
+			    #"Added Posting Status"

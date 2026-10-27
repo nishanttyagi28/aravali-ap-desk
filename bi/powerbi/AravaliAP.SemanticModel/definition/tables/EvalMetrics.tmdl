@@ -1,0 +1,56 @@
+table EvalMetrics
+	lineageTag: a1000006-0000-4000-8000-000000000006
+
+	measure 'Extraction Macro F1' = ```
+			CALCULATE(
+			    MAX(EvalMetrics[value]),
+			    EvalMetrics[metric] = "header_macro_f1"
+			)
+			```
+		formatString: 0.0%
+
+	measure 'Header Field F1 Avg' = ```
+			AVERAGEX(
+			    FILTER(EvalMetrics, EvalMetrics[metric] = "header_field_f1"),
+			    EvalMetrics[value]
+			)
+			```
+		formatString: 0.0%
+
+	measure 'Per Field F1' = ```
+			CALCULATE(
+			    MAX(EvalMetrics[value]),
+			    EvalMetrics[metric] = "header_field_f1"
+			)
+			```
+		formatString: 0.0%
+
+	column metric
+		dataType: string
+		summarizeBy: none
+		sourceColumn: metric
+
+	column field
+		dataType: string
+		summarizeBy: none
+		sourceColumn: field
+
+	column value
+		dataType: double
+		summarizeBy: none
+		sourceColumn: value
+
+	column run_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: run_id
+
+	partition EvalMetrics = m
+		mode: import
+		source =
+			let
+			    Source = Csv.Document(File.Contents(DataFolder & "eval_metrics.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+			    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+			    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers", {{"value", type number}}, "en-US")
+			in
+			    #"Changed Type"

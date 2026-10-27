@@ -52,4 +52,13 @@ Receipt canonical JSON (sorted keys, no whitespace, UTF-8) includes `entry_id`, 
 
 ## BI marts (M4)
 
-`bi.export` projects the operational DB into tidy CSVs for Power BI and `bi/mis` Excel workbooks. `bi.demo` builds a deterministic SQLite mart from the synthetic generator through the real pipeline (seed 7, n 50) for CI smoke and local dashboards.
+`bi.export` projects the operational DB into tidy CSVs for Power BI and Excel MIS. `bi.demo` builds a deterministic SQLite mart from the synthetic generator through the real pipeline (seed 7, n 50) for CI smoke and local dashboards.
+
+| Component | Path / command |
+|-----------|----------------|
+| CSV marts | `python -m bi.export --db … --out bi/data` |
+| Excel MIS | `python -m bi.mis --data bi/data --out mis.xlsx` (Summary, Aging, GST by rate, Vendors, Exceptions) |
+| Power BI PBIP | `bi/powerbi/AravaliAP.pbip` — TMDL model over CSVs via `DataFolder` parameter |
+| Chain verify | `python -m ledger.verify --db bi/data/demo.db` |
+
+Committed demo CSVs under `bi/data/` are refreshed in CI; `demo.db` is generated locally and gitignored.

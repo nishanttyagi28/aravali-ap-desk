@@ -1,0 +1,1 @@
+expression DataFolder = "E:\aravali-ap-desk\bi\data\" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]

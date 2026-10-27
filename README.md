@@ -99,7 +99,7 @@ Copy `.env.example` to `.env` for optional LLM mode (`EXTRACT_MODE=llm`, `GROQ_A
 .\.venv\Scripts\python -m bi.demo --out bi\data
 ```
 
-`bi.demo` runs the synthetic pipeline (`--n 50 --seed 7`), posts every **ALLOW** invoice, writes CSV marts under `bi/data`, and builds `bi/data/mis.xlsx`. See `bi/README.md` for column lists and Power BI notes.
+`bi.demo` runs the synthetic pipeline (`--n 50 --seed 7`), posts every **ALLOW** invoice, writes CSV marts under `bi/data`, and builds `bi/data/mis.xlsx`. Open `bi/powerbi/AravaliAP.pbip` in Power BI Desktop (PBIP preview) or run `python -m bi.mis --data bi/data --out mis.xlsx`. See `bi/README.md` for CSV columns, MIS sheets, and refresh steps.
 
 ### Sealed ledger verify (M4 stub)
 

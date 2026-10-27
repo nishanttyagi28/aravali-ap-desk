@@ -125,7 +125,13 @@ def _ledger_by_invoice(
     return {e.invoice_id: (e, receipts.get(e.entry_id)) for e in entries}
 
 
-def export_marts(session: Session, out_dir: Path, eval_report: Path | None = None) -> None:
+def export_marts(
+    session: Session,
+    out_dir: Path,
+    eval_report: Path | None = None,
+    *,
+    run_id: str | None = None,
+) -> None:
     vendors = _vendor_map(session)
     ledger_map = _ledger_by_invoice(session)
     invoice_rows: list[dict[str, Any]] = []
@@ -240,21 +246,26 @@ def export_marts(session: Session, out_dir: Path, eval_report: Path | None = Non
     _write_csv(out_dir / "issues.csv", ISSUE_COLUMNS, issue_rows)
     _write_csv(out_dir / "ledger.csv", LEDGER_COLUMNS, ledger_rows)
     _write_csv(out_dir / "vendors.csv", VENDOR_COLUMNS, vendor_rows)
-    _write_eval_metrics(out_dir, eval_report)
+    _write_eval_metrics(out_dir, eval_report, run_id=run_id)
 
 
-def _write_eval_metrics(out_dir: Path, eval_report: Path | None) -> None:
+def _write_eval_metrics(
+    out_dir: Path,
+    eval_report: Path | None,
+    *,
+    run_id: str | None = None,
+) -> None:
     rows: list[dict[str, str]] = []
+    stable_run_id = run_id or "offline-v1"
     if eval_report and eval_report.is_file():
         report = json.loads(eval_report.read_text(encoding="utf-8"))
-        run_id = report.get("truth_dir", "run")
         summary = report.get("summary") or {}
         rows.append(
             {
                 "metric": "header_macro_f1",
                 "field": "",
                 "value": str(summary.get("header_macro_f1") or ""),
-                "run_id": str(run_id),
+                "run_id": stable_run_id,
             }
         )
         rows.append(
@@ -262,7 +273,7 @@ def _write_eval_metrics(out_dir: Path, eval_report: Path | None) -> None:
                 "metric": "decision_accuracy",
                 "field": "",
                 "value": str(summary.get("decision_accuracy") or ""),
-                "run_id": str(run_id),
+                "run_id": stable_run_id,
             }
         )
         line = summary.get("line_items") or {}
@@ -271,7 +282,7 @@ def _write_eval_metrics(out_dir: Path, eval_report: Path | None) -> None:
                 "metric": "line_items_f1",
                 "field": "",
                 "value": str(line.get("f1") or ""),
-                "run_id": str(run_id),
+                "run_id": stable_run_id,
             }
         )
         bboxes = summary.get("bboxes") or {}
@@ -280,7 +291,7 @@ def _write_eval_metrics(out_dir: Path, eval_report: Path | None) -> None:
                 "metric": "bbox_iou_at_0_5",
                 "field": "",
                 "value": str(bboxes.get("iou_at_0_5_rate") or ""),
-                "run_id": str(run_id),
+                "run_id": stable_run_id,
             }
         )
         for name, scores in (summary.get("header_fields") or {}).items():
@@ -289,7 +300,7 @@ def _write_eval_metrics(out_dir: Path, eval_report: Path | None) -> None:
                     "metric": "header_field_f1",
                     "field": name,
                     "value": str(scores.get("f1") or ""),
-                    "run_id": str(run_id),
+                    "run_id": stable_run_id,
                 }
             )
     _write_csv(out_dir / "eval_metrics.csv", EVAL_COLUMNS, rows)

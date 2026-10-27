@@ -1,6 +1,6 @@
 # Business intelligence (M4)
 
-CSV marts and Excel MIS for AP dashboards (Power BI / finance ops).
+CSV marts, Excel MIS, and a Power BI PBIP project for AP dashboards.
 
 ## Export marts
 
@@ -30,15 +30,47 @@ Amounts are plain decimal strings with two fractional digits.
 
 Runs `datasets.synth` (`--n 50 --seed 7`) through ingest → extract → validate → post (every **ALLOW** invoice), exports CSVs, and builds `mis.xlsx`.
 
-Demo artifacts: `bi/data/demo.db`, `bi/data/receipts/<seq>.json`, and the CSV files above.
+Demo artifacts: `bi/data/demo.db` (gitignored), `bi/data/receipts/<seq>.json`, and the CSV files above.
 
 ## Excel MIS
 
-`bi/mis.py` loads the exported CSVs into workbook sheets: **Invoices**, **LineItems**, **Issues**, **Ledger**, **Vendors**, **EvalMetrics**.
+```powershell
+.\.venv\Scripts\python -m bi.mis --data bi/data --out bi/data/mis.xlsx
+.\.venv\Scripts\python -m bi.mis --data bi/data --out reports/ap_mis.xlsx --as-of 2026-10-26
+```
 
-## Power BI
+Workbook sheets:
 
-Point Power BI Desktop at `bi/data/*.csv` (or import `mis.xlsx`). Typical visuals: vendor spend, block/review rates, GST issue trends, posted ledger totals. CI does not run Power BI; validate reports locally.
+| Sheet | Purpose |
+|-------|---------|
+| **Summary** | Invoice counts by decision, grand total, posted amount, extraction macro F1 |
+| **Aging** | Unposted invoices by age bucket (0–30 / 31–60 / 61–90 / >90 days vs `--as-of`) |
+| **GST by rate** | Line-item pivot: `gst_rate` × taxable / CGST / SGST / IGST / cess |
+| **Vendors** | Exposure (`grand_total`) and unposted amount by vendor |
+| **Exceptions** | **REVIEW** / **BLOCK** rows grouped by `top_issue_code` |
+
+Amount columns use Indian-style `#,##,##0.00`; header rows are frozen with autofilter.
+
+## Power BI (PBIP)
+
+Project path: `bi/powerbi/AravaliAP.pbip`
+
+| Folder | Role |
+|--------|------|
+| `AravaliAP.SemanticModel/` | TMDL semantic model (CSV import) |
+| `AravaliAP.Report/` | Legacy `report.json` report (**AP Overview** page) |
+
+The model parameter **`DataFolder`** defaults to an absolute path with trailing backslash (`E:\aravali-ap-desk\bi\data\` in this clone). Power Query `File.Contents` requires that form on Windows. On another machine, use **Transform data → Edit parameters** and set `DataFolder` to your CSV folder (must end with `\`). Refresh after re-running `bi.export` or `bi.demo`.
+
+### Open and refresh (Power BI Desktop)
+
+1. Install Power BI Desktop (October 2024 or later).
+2. Enable **Preview features** → **Power BI Project (.pbip) save option** (and TMDL if prompted).
+3. Open `bi/powerbi/AravaliAP.pbip` (or `AravaliAP.Report/definition.pbir`).
+4. If data does not load, **Transform data → Edit parameters** and point **DataFolder** at your `bi\data\` folder (trailing backslash).
+5. **Home → Refresh** to reload CSVs.
+
+CI validates JSON/TMDL wiring with `tests/bi/test_pbip.py`; it does not run Power BI Desktop.
 
 ## Sealed ledger verify
 

@@ -1,0 +1,11 @@
+relationship LineItems-Invoices
+	fromColumn: LineItems.invoice_id
+	toColumn: Invoices.invoice_id
+
+relationship Issues-Invoices
+	fromColumn: Issues.invoice_id
+	toColumn: Invoices.invoice_id
+
+relationship Ledger-Invoices
+	fromColumn: Ledger.invoice_id
+	toColumn: Invoices.invoice_id

@@ -1,0 +1,104 @@
+table LineItems
+	lineageTag: a1000002-0000-4000-8000-000000000002
+
+	measure 'CGST Total' = SUM(LineItems[cgst])
+		formatString: "₹"#,##0
+
+	measure 'SGST Total' = SUM(LineItems[sgst])
+		formatString: "₹"#,##0
+
+	measure 'IGST Total' = SUM(LineItems[igst])
+		formatString: "₹"#,##0
+
+	measure 'Cess Total' = SUM(LineItems[cess])
+		formatString: "₹"#,##0
+
+	measure 'Line Taxable Value' = SUM(LineItems[taxable_value])
+		formatString: "₹"#,##0
+
+	column invoice_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: invoice_id
+
+	column line_index
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: line_index
+
+	column description
+		dataType: string
+		summarizeBy: none
+		sourceColumn: description
+
+	column hsn_sac
+		dataType: string
+		summarizeBy: none
+		sourceColumn: hsn_sac
+
+	column qty
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: qty
+
+	column unit_price
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: unit_price
+
+	column gst_rate
+		dataType: double
+		summarizeBy: none
+		sourceColumn: gst_rate
+
+	column 'GST Rate Label'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: GST Rate Label
+		sortByColumn: gst_rate
+
+	column taxable_value
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: taxable_value
+
+	column cgst
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: cgst
+
+	column sgst
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: sgst
+
+	column igst
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: igst
+
+	column cess
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: cess
+
+	column total
+		dataType: double
+		summarizeBy: sum
+		sourceColumn: total
+
+	partition LineItems = m
+		mode: import
+		source =
+			let
+			    Source = Csv.Document(File.Contents(DataFolder & "line_items.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+			    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+			    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers", {{"invoice_id", type text}, {"line_index", Int64.Type}, {"qty", type number}, {"unit_price", type number}, {"gst_rate", type number}, {"taxable_value", type number}, {"cgst", type number}, {"sgst", type number}, {"igst", type number}, {"cess", type number}, {"total", type number}}, "en-US"),
+			    #"Added GST Rate Label" = Table.AddColumn(
+			        #"Changed Type",
+			        "GST Rate Label",
+			        each Text.From(Number.Round([gst_rate], 0)) & "%",
+			        type text
+			    )
+			in
+			    #"Added GST Rate Label"

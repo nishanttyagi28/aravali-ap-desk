@@ -26,3 +26,6 @@ datasets/generated/
 
 # Power BI locks
 *.pbix.lock
+
+# Generated BI demo database (local / CI only)
+bi/data/demo.db
