@@ -6,7 +6,7 @@ Indian GST vendor invoices arrive as scanned PDFs and email attachments. AP team
 
 ![Power BI AP Overview (demo data)](bi/screenshots/ap-overview.png)
 
-**Demo video (2:41, recorded running locally on Windows):** [docs/demo/aravali-demo.mp4](docs/demo/aravali-demo.mp4) - tests + demo pipeline + seal verify in the VS Code terminal, Review UI (queue, BLOCK filter, REVIEW invoice approved and posted to the sealed ledger), Power BI AP Overview, Excel MIS.
+**Demo video (2:53, recorded running locally on Windows):** [docs/demo/aravali-demo.mp4](docs/demo/aravali-demo.mp4) - tests + demo pipeline + seal verify in the VS Code terminal, Review UI (queue, BLOCK filter, BLOCK invoice detail with bbox overlay, REVIEW invoice approved and posted to the sealed ledger), Power BI AP Overview, Excel MIS.
 
 ![Review UI demo](docs/demo/aravali-demo.gif)
 
