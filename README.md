@@ -73,6 +73,8 @@ Per-header-field F1 is also **1.00** (floor **0.98**). See [docs/evaluation.md](
 
 ## Quickstart
 
+**New machine / fresh clone:** follow [SETUP.md](SETUP.md) (prerequisites, venv, seed DB, tests, API + UI, demo pipeline, Power BI).
+
 ### One-command dev (API + UI)
 
 **Windows**
@@ -136,7 +138,7 @@ Captured from Power BI Desktop and Excel on the supervisor laptop after M4b veri
 
 ## How it was built: human-controlled multi-agent harness
 
-The **supervisor** (human + automation outside this repo) never writes product code. **Lead** integrates on `main`; worker roles **A–D** edit only paths in `AGENTS.md`. **Cursor hooks** (`preToolUse`, `beforeShellExecution`, fail-closed) enforce scope with rule IDs `AAD-SCOPE-000`–`AAD-SCOPE-005` and `AAD-SHELL-001`–`AAD-SHELL-003`. An independent supervisor scope check and **frozen contracts** after M1 block casual contract drift. Every agent run ends in a **quality gate** (ruff, ruff format, pytest in the worktree venv). **Budgets:** per-run caps (6M SDK-reported tokens, 60 minutes, 400 tool calls; mid-run token **estimate** since 2026-10-26 because usage arrives only at run end—the M3 run hit **16.1M** before that fix), per-day cap **80M** (raised from 40M), max **2** correction rounds per step/role. M2 used **git worktrees** per role, merge-to-main with gate on merged main and rollback on failure. All runs are logged (`logs/runs.jsonl` on the supervisor side).
+The **supervisor** (human + automation outside this repo) never writes product code. **Lead** integrates on `main`; worker roles **A–D** edit only paths in `AGENTS.md`. **Cursor hooks** (`preToolUse`, `beforeShellExecution`, fail-closed) enforce scope with rule IDs `AAD-SCOPE-000`–`AAD-SCOPE-005` and `AAD-SHELL-001`–`AAD-SHELL-003`. An independent supervisor scope check and **frozen contracts** after M1 block casual contract drift. Every agent run ends in a **quality gate** (ruff, ruff format, pytest in the worktree venv). **Budgets:** per-run caps (6M SDK-reported tokens, 60 minutes, 400 tool calls; mid-run token **estimate** since 2026-10-26 because usage arrives only at run end—the M3 run hit **16.1M** before that fix), per-day cap **80M** (raised from 40M), max **2** correction rounds per step/role. M2 used **git worktrees** per role, merge-to-main with gate on merged main and rollback on failure. All runs are logged (`logs/runs.jsonl` on the supervisor side). The harness, every prompt and all run logs are in the private repo [nishanttyagi28/aravali-supervisor](https://github.com/nishanttyagi28/aravali-supervisor).
 
 **M4b:** Real Power BI Desktop verification drove two correction rounds (empty page / bad visual layouts, then DAX and data-path fixes) until all 11 visuals rendered with demo data. See [docs/multi-agent-build.md](docs/multi-agent-build.md).
 
