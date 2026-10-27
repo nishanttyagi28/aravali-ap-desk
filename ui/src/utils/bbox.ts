@@ -9,6 +9,15 @@ export interface BBox {
 
 export type PageRotation = 0 | 90 | 180 | 270;
 
+/** Normalise pdf.js page rotation to 0, 90, 180, or 270 degrees clockwise. */
+export function normalizePageRotation(rotate: number): PageRotation {
+  const norm = ((rotate % 360) + 360) % 360;
+  if (norm === 90 || norm === 180 || norm === 270) {
+    return norm;
+  }
+  return 0;
+}
+
 export interface CanvasRect {
   x: number;
   y: number;

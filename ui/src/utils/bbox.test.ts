@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bboxToCanvasRect } from "./bbox";
+import { bboxToCanvasRect, normalizePageRotation } from "./bbox";
 
 const sample = {
   page: 1,
@@ -8,6 +8,15 @@ const sample = {
   x1: 150,
   y1: 220,
 };
+
+describe("normalizePageRotation", () => {
+  it("normalises negative and multi-turn values", () => {
+    expect(normalizePageRotation(-90)).toBe(270);
+    expect(normalizePageRotation(450)).toBe(90);
+    expect(normalizePageRotation(180)).toBe(180);
+    expect(normalizePageRotation(0)).toBe(0);
+  });
+});
 
 describe("bboxToCanvasRect", () => {
   const pageWidth = 600;
