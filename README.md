@@ -167,6 +167,13 @@ The **M5** release-prep run (this README and docs) is **not** listed in the harn
 
 **Harness totals (rows 1–16, SDK `totalTokens` where reported):** ~47.9M tokens, ~1,934 tool calls, ~333 agent-minutes. SDK total = input + output + cache read (input already includes cache reads, so totals double-count cache for budgeting).
 
+### Governance and what broke
+
+Two front doors into the above, for anyone who does not want to read a token ledger:
+
+- **[GOVERNANCE.md](GOVERNANCE.md)** — the ownership tiers, the fail-closed hooks and their rule IDs, why agents cannot commit, what the `Supervisor-Approval` trailer actually records (19 of 24 commits are `auto:`, which is worth knowing), and an explicit list of what this machinery does **not** cover.
+- **[POSTMORTEMS/](POSTMORTEMS/)** — two failures written up properly. A 6M token cap that could not stop a 16.1M run, and a review UI that rendered pages upside down with misaligned bbox overlays, which matters because a human approving a BLOCK invoice was looking at the wrong part of the page.
+
 ## Milestones
 
 - [x] **M1 — Contracts** — schemas, OpenAPI, hooks, CI, synthetic generator
@@ -177,6 +184,8 @@ The **M5** release-prep run (this README and docs) is **not** listed in the harn
 
 ## Docs
 
+- [GOVERNANCE.md](GOVERNANCE.md) — human control over the agents: tiers, hooks, approval trailers, limits
+- [POSTMORTEMS/](POSTMORTEMS/) — what broke, how it was found, what changed
 - [docs/architecture.md](docs/architecture.md) — contracts, trust boundaries, ledger stub
 - [docs/evaluation.md](docs/evaluation.md) — reproducing evals and CI
 - [docs/multi-agent-build.md](docs/multi-agent-build.md) — harness controls and war stories
